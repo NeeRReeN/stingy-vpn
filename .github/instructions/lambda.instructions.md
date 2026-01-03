@@ -352,10 +352,10 @@ function createMockEvent(detail: Record<string, string>) {
   };
 }
 
-const mockContext = {
+const mockContext: Pick<Context, "awsRequestId" | "functionName"> = {
   awsRequestId: "test-request-id",
   functionName: "test-function",
-} as any;
+};
 ```
 
 ## Performance Optimization
