@@ -9,8 +9,9 @@ Manages type definitions, constants, and configurations used throughout the proj
 ## File Structure
 
 ```
-config/
-└── types.ts            # Common type definitions
+src/
+└── config/
+    └── types.ts        # Common type definitions
 ```
 
 ## Type Definition Principles

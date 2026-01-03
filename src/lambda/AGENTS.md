@@ -12,13 +12,14 @@ stingy-vpn has the following two Lambda functions:
 ## Directory Structure
 
 ```
-lambda/
-├── recovery/           # Spot instance recovery handling
-│   ├── index.ts        # Main handler
-│   └── __tests__/      # Tests
-├── ddns-updater/       # Cloudflare DDNS updates
-│   ├── index.ts        # Main handler
-│   └── __tests__/      # Tests
+src/
+└── lambda/
+    ├── recovery/           # Spot instance recovery handling
+    │   ├── index.ts        # Main handler
+    │   └── __tests__/      # Tests
+    └── ddns-updater/       # Cloudflare DDNS updates
+        ├── index.ts        # Main handler
+        └── __tests__/      # Tests
 ```
 
 ## Lambda Function Specifications
