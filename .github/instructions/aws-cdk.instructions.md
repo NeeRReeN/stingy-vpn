@@ -99,7 +99,7 @@ lambdaFunction.addToRolePolicy(
   new iam.PolicyStatement({
     effect: iam.Effect.ALLOW,
     actions: ["ec2:DescribeInstances", "ec2:RunInstances"],
-    resources: ["*"], // EC2 may be difficult to specify ARN
+    resources: ["*"],
     conditions: {
       StringEquals: {
         "ec2:ResourceTag/Project": "stingy-vpn",
