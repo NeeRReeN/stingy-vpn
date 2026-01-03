@@ -1,58 +1,58 @@
-# WireGuard 設定ガイド
+# WireGuard Configuration Guide
 
-このディレクトリには WireGuard VPN の設定ファイルが含まれます。
+This directory contains WireGuard VPN configuration files.
 
-## 概要
+## Overview
 
-WireGuard はモダンで高速な VPN プロトコルです。このプロジェクトでは、EC2 インスタンスを VPN サーバーとして使用し、自宅機と外出先機を接続します。
+WireGuard is a modern, fast VPN protocol. In this project, we use an EC2 instance as the VPN server to connect home and mobile devices.
 
-## ディレクトリ構成
+## Directory Structure
 
 ```
 wireguard/
-├── server/                 # サーバー設定（S3 にアップロード）
+├── server/                 # Server configuration (uploaded to S3)
 │   └── wg0.conf
-├── client/                 # クライアント設定（gitignore対象）
+├── client/                 # Client configuration (gitignored)
 │   ├── .gitkeep
-│   ├── home.conf.example       # 自宅機用雛形（追跡対象）
-│   └── mobile.conf.example     # 外出先機用雛形（追跡対象）
+│   ├── home.conf.example       # Home device template (tracked)
+│   └── mobile.conf.example     # Mobile device template (tracked)
 ```
 
-## サーバー設定
+## Server Configuration
 
-### サーバー設定テンプレート（`server/wg0.conf`）
+### Server Configuration Template (`server/wg0.conf`)
 
 ```ini
 [Interface]
 Address = 10.0.0.1/24
 ListenPort = 51820
-PrivateKey = <SERVER_PRIVATE_KEY>  # Parameter Store から取得
+PrivateKey = <SERVER_PRIVATE_KEY>  # Retrieved from Parameter Store
 
-# 自宅機
+# Home device
 [Peer]
 PublicKey = <HOME_DEVICE_PUBLIC_KEY>
 AllowedIPs = 10.0.0.2/32
 
-# 外出先機
+# Mobile device
 [Peer]
 PublicKey = <MOBILE_DEVICE_PUBLIC_KEY>
 AllowedIPs = 10.0.0.3/32
 ```
 
-### 設定のポイント
+### Configuration Notes
 
-- サーバーは `10.0.0.1/24` を使用
-- ポート `51820` は WireGuard のデフォルト
-- 各クライアントには固有の IP アドレスを割り当て
+- Server uses `10.0.0.1/24`
+- Port `51820` is the WireGuard default
+- Each client is assigned a unique IP address
 
-## クライアント設定
+## Client Configuration
 
-### クライアント設定テンプレート
+### Client Configuration Template
 
 ```ini
 [Interface]
 Address = 10.0.0.X/24
-PrivateKey = <YOUR_PRIVATE_KEY>  # ローカルで生成、コミット禁止
+PrivateKey = <YOUR_PRIVATE_KEY>  # Generated locally, never commit
 DNS = 1.1.1.1
 
 [Peer]
@@ -62,99 +62,99 @@ AllowedIPs = 10.0.0.0/24
 PersistentKeepalive = 25
 ```
 
-### 設定のポイント
+### Configuration Notes
 
-- 各クライアントには異なる IP アドレス（10.0.0.2, 10.0.0.3 など）を使用
-- DNS は Cloudflare の 1.1.1.1 を推奨
-- `PersistentKeepalive = 25` で NAT 越えを維持
+- Use different IP addresses for each client (10.0.0.2, 10.0.0.3, etc.)
+- Cloudflare's 1.1.1.1 is recommended for DNS
+- `PersistentKeepalive = 25` maintains NAT traversal
 
-## 鍵の生成
+## Key Generation
 
 ```bash
-# 秘密鍵の生成
+# Generate private key
 wg genkey > privatekey
 
-# 公開鍵の生成（秘密鍵から）
+# Generate public key (from private key)
 wg pubkey < privatekey > publickey
 ```
 
-## セキュリティ重要事項
+## Security Important Notes
 
-### 🔐 絶対にコミットしてはいけないもの
+### Never Commit These
 
-- ❌ **秘密鍵**（`PrivateKey`）
-- ❌ **実際のクライアント設定ファイル**（`client/*.conf`、`.example` 以外）
+- **Private keys** (`PrivateKey`)
+- **Actual client configuration files** (`client/*.conf`, except `.example`)
 
-### ✅ コミット可能なもの
+### Safe to Commit
 
-- ✅ **公開鍵**（`PublicKey`）
-- ✅ **設定の雛形**（`*.conf.example`）
-- ✅ **サーバー設定テンプレート**（秘密鍵はプレースホルダー）
+- **Public keys** (`PublicKey`)
+- **Configuration templates** (`*.conf.example`)
+- **Server configuration template** (private key as placeholder)
 
-## WireGuard 設定の適用
+## Applying WireGuard Configuration
 
-### サーバー側（EC2 インスタンス）
+### Server Side (EC2 Instance)
 
 ```bash
-# WireGuard インストール
+# Install WireGuard
 sudo apt update
 sudo apt install wireguard
 
-# 設定ファイルを配置
+# Place configuration file
 sudo cp wg0.conf /etc/wireguard/
 
-# WireGuard を起動
+# Start WireGuard
 sudo wg-quick up wg0
 
-# 自動起動を有効化
+# Enable auto-start
 sudo systemctl enable wg-quick@wg0
 ```
 
-### クライアント側
+### Client Side
 
 ```bash
-# WireGuard インストール（macOS）
+# Install WireGuard (macOS)
 brew install wireguard-tools
 
-# 設定ファイルを配置
+# Place configuration file
 cp home.conf /usr/local/etc/wireguard/wg0.conf
 
-# WireGuard を起動
+# Start WireGuard
 wg-quick up wg0
 
-# WireGuard を停止
+# Stop WireGuard
 wg-quick down wg0
 ```
 
-## トラブルシューティング
+## Troubleshooting
 
-### VPN 接続できない
+### Cannot Connect to VPN
 
-| 問題                 | 原因                 | 解決策                               |
-| -------------------- | -------------------- | ------------------------------------ |
-| 接続がタイムアウト   | DNS 未更新           | Cloudflare で DNS レコード確認       |
-| ハンドシェイクが失敗 | 鍵の不一致           | 公開鍵・秘密鍵のペアを確認           |
-| NAT 越えができない   | Keepalive 未設定     | `PersistentKeepalive = 25` を設定    |
-| EC2 に接続できない   | セキュリティグループ | ポート 51820/UDP を許可              |
-| IP アドレスの競合    | 同じ IP を使用       | 各クライアントに異なる IP を割り当て |
+| Issue                 | Cause             | Solution                            |
+| --------------------- | ----------------- | ----------------------------------- |
+| Connection timeout    | DNS not updated   | Check DNS record in Cloudflare      |
+| Handshake fails       | Key mismatch      | Verify public/private key pairs     |
+| NAT traversal fails   | Keepalive not set | Set `PersistentKeepalive = 25`      |
+| Cannot connect to EC2 | Security group    | Allow port 51820/UDP                |
+| IP address conflict   | Same IP used      | Assign different IPs to each client |
 
-### 接続状態の確認
+### Checking Connection Status
 
 ```bash
-# WireGuard のステータス確認
+# Check WireGuard status
 sudo wg show
 
-# ハンドシェイクの確認（最新のハンドシェイク時刻が表示される）
+# Check handshakes (shows latest handshake time)
 sudo wg show wg0 latest-handshakes
 
-# 転送データ量の確認
+# Check transfer data
 sudo wg show wg0 transfer
 ```
 
-## ベストプラクティス
+## Best Practices
 
-- 秘密鍵は絶対にコミットしない
-- 公開鍵のみ共有可能
-- `AllowedIPs` を最小限に（必要な IP 範囲のみ許可）
-- 定期的に鍵をローテーション
-- クライアント設定は `.example` ファイルをコピーして作成
+- Never commit private keys
+- Only public keys can be shared
+- Keep `AllowedIPs` minimal (only allow necessary IP ranges)
+- Rotate keys periodically
+- Create client configuration by copying `.example` files

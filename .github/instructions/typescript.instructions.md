@@ -1,63 +1,63 @@
 ---
 applyTo: "**/*.ts"
-description: "TypeScript 開発のベストプラクティスとコーディング規約"
+description: "TypeScript development best practices and coding conventions"
 ---
 
-# TypeScript 開発ガイドライン
+# TypeScript Development Guidelines
 
-## 基本方針
+## Core Principles
 
-- TypeScript 5.x / ES2022 をターゲット
-- 純粋な ES Modules を使用（`require`, `module.exports` 禁止）
-- 可読性と明示性を重視し、トリッキーな実装を避ける
+- Target TypeScript 5.x / ES2022
+- Use pure ES Modules (`require`, `module.exports` are prohibited)
+- Prioritize readability and explicitness; avoid tricky implementations
 
-## 型システム
+## Type System
 
-### 型定義
+### Type Definitions
 
 ```typescript
-// ✅ 明示的な型定義
+// Explicit type definitions
 interface WireGuardPeer {
   publicKey: string;
   allowedIPs: string[];
   endpoint?: string;
 }
 
-// ✅ discriminated union で状態を表現
+// Use discriminated unions to represent state
 type OperationResult<T> =
   | { success: true; data: T }
   | { success: false; error: Error };
 
-// ❌ any の使用禁止
+// Do not use `any`
 function process(data: any) {} // NG
 
-// ✅ unknown + 型ガード
+// Use `unknown` + type guards
 function process(data: unknown) {
   if (isValidData(data)) {
-    // 安全に処理
+    // Process safely
   }
 }
 ```
 
-### ユーティリティ型の活用
+### Utilizing Utility Types
 
 ```typescript
-// Readonly で不変性を表現
+// Express immutability with Readonly
 type ReadonlyConfig = Readonly<Config>;
 
-// Partial で部分更新
+// Use Partial for partial updates
 type ConfigUpdate = Partial<Config>;
 
-// Pick/Omit で必要なプロパティのみ抽出
+// Extract only necessary properties with Pick/Omit
 type PublicConfig = Omit<Config, "secretKey">;
 ```
 
-## 非同期処理
+## Asynchronous Processing
 
-### async/await パターン
+### async/await Pattern
 
 ```typescript
-// ✅ 推奨: async/await + try-catch
+// Recommended: async/await + try-catch
 async function fetchData(): Promise<Data> {
   try {
     const response = await fetch(url);
@@ -71,29 +71,29 @@ async function fetchData(): Promise<Data> {
   }
 }
 
-// ❌ 避ける: コールバックチェーン
+// Avoid: callback chains
 function fetchData(callback: (err: Error | null, data?: Data) => void) {}
 ```
 
-### 並列処理
+### Parallel Processing
 
 ```typescript
-// ✅ 独立した処理は並列実行
+// Run independent operations in parallel
 const [users, posts] = await Promise.all([fetchUsers(), fetchPosts()]);
 
-// ✅ エラーを個別にハンドリング
+// Handle errors individually
 const results = await Promise.allSettled([
   riskyOperation1(),
   riskyOperation2(),
 ]);
 ```
 
-## エラーハンドリング
+## Error Handling
 
-### カスタムエラー
+### Custom Errors
 
 ```typescript
-// ✅ ドメイン固有のエラークラス
+// Domain-specific error class
 class CloudflareApiError extends Error {
   constructor(
     message: string,
@@ -105,14 +105,14 @@ class CloudflareApiError extends Error {
   }
 }
 
-// 使用例
+// Usage example
 throw new CloudflareApiError("DNS update failed", 403, "FORBIDDEN");
 ```
 
-### ガード節で早期リターン
+### Early Return with Guard Clauses
 
 ```typescript
-// ✅ 推奨: ガード節
+// Recommended: guard clauses
 function processRecord(record: Record | null): Result {
   if (!record) {
     throw new Error("Record is required");
@@ -120,11 +120,11 @@ function processRecord(record: Record | null): Result {
   if (!record.isValid) {
     throw new Error("Record is invalid");
   }
-  // メイン処理
+  // Main processing
   return doProcess(record);
 }
 
-// ❌ 避ける: 深いネスト
+// Avoid: deep nesting
 function processRecord(record: Record | null): Result {
   if (record) {
     if (record.isValid) {
@@ -135,64 +135,64 @@ function processRecord(record: Record | null): Result {
 }
 ```
 
-## 関数設計
+## Function Design
 
-### 単一責任
+### Single Responsibility
 
 ```typescript
-// ✅ 1つの関数は1つの責任
+// One function = one responsibility
 async function updateDnsRecord(ip: string): Promise<void> {
   const record = await fetchCurrentRecord();
   const updated = await patchRecord(record.id, ip);
   await verifyUpdate(updated);
 }
 
-// ❌ 避ける: 複数の責任を持つ巨大関数
+// Avoid: giant functions with multiple responsibilities
 async function handleEverything() {
-  // DNS更新、通知、ログ、クリーンアップ全部入り
+  // DNS update, notification, logging, cleanup all in one
 }
 ```
 
-### 純粋関数を優先
+### Prefer Pure Functions
 
 ```typescript
-// ✅ 純粋関数: 同じ入力 → 同じ出力
+// Pure function: same input → same output
 function calculateAllowedIPs(peers: Peer[]): string[] {
   return peers.map((p) => p.allowedIP);
 }
 
-// 副作用がある場合は明示的に
+// Make side effects explicit
 async function saveConfig(config: Config): Promise<void> {
   await writeFile(CONFIG_PATH, JSON.stringify(config));
 }
 ```
 
-## インポート/エクスポート
+## Imports/Exports
 
 ```typescript
-// ✅ 名前付きエクスポートを優先
+// Prefer named exports
 export { updateDnsRecord, fetchRecord };
 export type { DnsRecord, UpdateOptions };
 
-// ✅ Node.js 組み込みモジュールは node: プレフィックス
+// Use node: prefix for Node.js built-in modules
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
-// ❌ 避ける: default export の乱用
-export default class {} // 名前がないと追跡困難
+// Avoid: overuse of default exports
+export default class {} // Hard to track without a name
 ```
 
-## コメントとドキュメント
+## Comments and Documentation
 
 ````typescript
 /**
- * Cloudflare DNS レコードを更新する
+ * Update a Cloudflare DNS record
  *
  * @param zoneId - Cloudflare Zone ID
- * @param recordId - 更新対象の DNS レコード ID
- * @param ip - 新しい IP アドレス
- * @returns 更新されたレコード
- * @throws {CloudflareApiError} API エラー時
+ * @param recordId - DNS record ID to update
+ * @param ip - New IP address
+ * @returns Updated record
+ * @throws {CloudflareApiError} On API error
  *
  * @example
  * ```ts
@@ -204,6 +204,6 @@ export async function updateDnsRecord(
   recordId: string,
   ip: string
 ): Promise<DnsRecord> {
-  // 実装
+  // Implementation
 }
 ````

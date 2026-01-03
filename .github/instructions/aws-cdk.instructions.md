@@ -1,34 +1,34 @@
 ---
 applyTo: "**/cdk/**/*.ts,**/lib/**/*.ts,**/*-stack.ts"
-description: "AWS CDK スタック開発のベストプラクティス"
+description: "AWS CDK stack development best practices"
 ---
 
-# AWS CDK 開発ガイドライン
+# AWS CDK Development Guidelines
 
-## 基本方針
+## Core Principles
 
-- AWS CDK v2 を使用
-- L2 Construct を優先（L1 は必要な場合のみ）
-- インフラをコードとして明確に表現
+- Use AWS CDK v2
+- Prefer L2 Constructs (use L1 only when necessary)
+- Express infrastructure as code clearly
 
-## プロジェクト構造
+## Project Structure
 
 ```
 src/cdk/
 ├── bin/
-│   └── app.ts              # CDK アプリケーションのエントリポイント
+│   └── app.ts              # CDK application entry point
 ├── lib/
-│   ├── stingy-vpn-stack.ts # メインスタック
-│   └── constructs/         # 再利用可能な Construct
+│   ├── stingy-vpn-stack.ts # Main stack
+│   └── constructs/         # Reusable Constructs
 │       ├── vpc-construct.ts
 │       └── lambda-construct.ts
 └── config/
-    └── environments.ts     # 環境別設定
+    └── environments.ts     # Environment-specific configuration
 ```
 
-## スタック定義
+## Stack Definition
 
-### 基本パターン
+### Basic Pattern
 
 ```typescript
 import * as cdk from "aws-cdk-lib";
@@ -47,59 +47,59 @@ export class StingyVpnStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: StingyVpnStackProps) {
     super(scope, id, props);
 
-    // リソース定義
+    // Resource definitions
   }
 }
 ```
 
-### Props の設計
+### Props Design
 
 ```typescript
-// ✅ 推奨: 明確な Props インターフェース
+// Recommended: clear Props interface
 export interface LambdaConstructProps {
-  /** Lambda 関数名 */
+  /** Lambda function name */
   readonly functionName: string;
-  /** タイムアウト（デフォルト: 30秒） */
+  /** Timeout (default: 30 seconds) */
   readonly timeout?: cdk.Duration;
-  /** 環境変数 */
+  /** Environment variables */
   readonly environment?: Record<string, string>;
 }
 
-// デフォルト値は Construct 内で設定
+// Set default values within the Construct
 const timeout = props.timeout ?? cdk.Duration.seconds(30);
 ```
 
-## リソース命名
+## Resource Naming
 
 ```typescript
-// ✅ 論理的な名前を使用（物理名は CDK に任せる）
+// Use logical names (let CDK handle physical names)
 const bucket = new s3.Bucket(this, "ConfigBucket", {
-  // removalPolicy は環境に応じて設定
+  // Set removalPolicy based on environment
   removalPolicy:
     props.environment === "prod"
       ? cdk.RemovalPolicy.RETAIN
       : cdk.RemovalPolicy.DESTROY,
 });
 
-// 物理名が必要な場合は明示的に
+// Be explicit when physical names are needed
 const parameterName = `/stingy-vpn/${props.environment}/instance-id`;
 ```
 
-## IAM ポリシー
+## IAM Policies
 
-### 最小権限の原則
+### Principle of Least Privilege
 
 ```typescript
-// ✅ 推奨: リソースベースで最小限の権限
+// Recommended: minimum permissions based on resources
 bucket.grantRead(lambdaFunction);
 parameter.grantRead(lambdaFunction);
 
-// ✅ 特定アクションのみ許可
+// Allow only specific actions
 lambdaFunction.addToRolePolicy(
   new iam.PolicyStatement({
     effect: iam.Effect.ALLOW,
     actions: ["ec2:DescribeInstances", "ec2:RunInstances"],
-    resources: ["*"], // EC2 は ARN 指定が難しい場合あり
+    resources: ["*"], // EC2 may be difficult to specify ARN
     conditions: {
       StringEquals: {
         "ec2:ResourceTag/Project": "stingy-vpn",
@@ -108,7 +108,7 @@ lambdaFunction.addToRolePolicy(
   })
 );
 
-// ❌ 避ける: 過剰な権限
+// Avoid: excessive permissions
 lambdaFunction.addToRolePolicy(
   new iam.PolicyStatement({
     actions: ["ec2:*"],
@@ -117,13 +117,13 @@ lambdaFunction.addToRolePolicy(
 );
 ```
 
-## Lambda 関数の定義
+## Lambda Function Definition
 
 ```typescript
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as lambdaNodejs from "aws-cdk-lib/aws-lambda-nodejs";
 
-// ✅ NodejsFunction で TypeScript を直接バンドル
+// Bundle TypeScript directly with NodejsFunction
 const recoveryFunction = new lambdaNodejs.NodejsFunction(
   this,
   "RecoveryFunction",
@@ -131,7 +131,7 @@ const recoveryFunction = new lambdaNodejs.NodejsFunction(
     entry: "src/lambda/recovery/index.ts",
     handler: "handler",
     runtime: lambda.Runtime.NODEJS_20_X,
-    architecture: lambda.Architecture.ARM_64, // コスト効率
+    architecture: lambda.Architecture.ARM_64, // Cost efficiency
     timeout: cdk.Duration.minutes(5),
     memorySize: 256,
     environment: {
@@ -146,10 +146,10 @@ const recoveryFunction = new lambdaNodejs.NodejsFunction(
 );
 ```
 
-## EC2 スポットインスタンス
+## EC2 Spot Instances
 
 ```typescript
-// スポットインスタンスの起動テンプレート
+// Launch template for spot instances
 const launchTemplate = new ec2.LaunchTemplate(this, "SpotTemplate", {
   instanceType:
     props.spotInstanceType ??
@@ -166,13 +166,13 @@ const launchTemplate = new ec2.LaunchTemplate(this, "SpotTemplate", {
 });
 ```
 
-## EventBridge ルール
+## EventBridge Rules
 
 ```typescript
 import * as events from "aws-cdk-lib/aws-events";
 import * as targets from "aws-cdk-lib/aws-events-targets";
 
-// スポット中断イベントのルール
+// Rule for spot interruption events
 const spotInterruptionRule = new events.Rule(this, "SpotInterruptionRule", {
   eventPattern: {
     source: ["aws.ec2"],
@@ -191,16 +191,16 @@ spotInterruptionRule.addTarget(new targets.LambdaFunction(recoveryFunction));
 ```typescript
 import * as ssm from "aws-cdk-lib/aws-ssm";
 
-// パラメータの作成
+// Create parameter
 const instanceIdParam = new ssm.StringParameter(this, "InstanceIdParam", {
   parameterName: `/stingy-vpn/${props.environment}/instance-id`,
-  stringValue: "initial", // 初期値（Lambda で更新）
-  description: "現在のスポットインスタンス ID",
+  stringValue: "initial", // Initial value (updated by Lambda)
+  description: "Current spot instance ID",
   tier: ssm.ParameterTier.STANDARD,
 });
 
-// SecureString は手動作成を推奨（API トークンなど）
-// CDK では参照のみ
+// SecureString is recommended to be created manually (API tokens, etc.)
+// Only reference in CDK
 const apiToken = ssm.StringParameter.fromSecureStringParameterAttributes(
   this,
   "CloudflareToken",
@@ -210,16 +210,16 @@ const apiToken = ssm.StringParameter.fromSecureStringParameterAttributes(
 );
 ```
 
-## タグ付け
+## Tagging
 
 ```typescript
-// スタック全体にタグを適用
+// Apply tags to entire stack
 cdk.Tags.of(this).add("Project", "stingy-vpn");
 cdk.Tags.of(this).add("Environment", props.environment);
 cdk.Tags.of(this).add("ManagedBy", "CDK");
 ```
 
-## テスト
+## Testing
 
 ```typescript
 import * as cdk from "aws-cdk-lib";
@@ -250,15 +250,15 @@ describe("StingyVpnStack", () => {
 });
 ```
 
-## デプロイ
+## Deployment
 
 ```bash
-# 差分確認（必ず実行）
+# Check diff (always run)
 npx cdk diff
 
-# デプロイ
+# Deploy
 npx cdk deploy
 
-# 特定スタックのみ
+# Deploy specific stack only
 npx cdk deploy StingyVpnStack-dev
 ```

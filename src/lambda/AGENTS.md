@@ -1,94 +1,94 @@
-# Lambda 関数開発ガイド
+# Lambda Function Development Guide
 
-このディレクトリには AWS Lambda 関数が含まれます。
+This directory contains AWS Lambda functions.
 
-## 概要
+## Overview
 
-stingy-vpn の Lambda 関数は以下の 2 つです：
+stingy-vpn has the following two Lambda functions:
 
-- **recovery**: スポットインスタンス中断時の復旧処理
-- **ddns-updater**: Cloudflare DDNS レコードの更新
+- **recovery**: Recovery handling during spot instance interruption
+- **ddns-updater**: Cloudflare DDNS record updates
 
-## ディレクトリ構成
+## Directory Structure
 
 ```
 lambda/
-├── recovery/           # スポットインスタンス復旧処理
-│   ├── index.ts        # メインハンドラー
-│   └── __tests__/      # テスト
-├── ddns-updater/       # Cloudflare DDNS 更新
-│   ├── index.ts        # メインハンドラー
-│   └── __tests__/      # テスト
+├── recovery/           # Spot instance recovery handling
+│   ├── index.ts        # Main handler
+│   └── __tests__/      # Tests
+├── ddns-updater/       # Cloudflare DDNS updates
+│   ├── index.ts        # Main handler
+│   └── __tests__/      # Tests
 ```
 
-## Lambda 関数仕様
+## Lambda Function Specifications
 
-### recovery 関数
+### recovery Function
 
-**目的**: EC2 スポットインスタンス中断時に新しいインスタンスを起動し、設定を復元
+**Purpose**: Launch a new instance and restore configuration when EC2 spot instance is interrupted
 
-**トリガー**: EventBridge (EC2 Spot Instance Interruption Warning)
+**Trigger**: EventBridge (EC2 Spot Instance Interruption Warning)
 
-**処理フロー**:
+**Processing Flow**:
 
-1. 中断イベントを受信
-2. 新しいスポットインスタンスをリクエスト
-3. S3 から WireGuard 設定を取得
-4. 新インスタンスに設定を適用
-5. Parameter Store のインスタンス ID を更新
+1. Receive interruption event
+2. Request a new spot instance
+3. Retrieve WireGuard configuration from S3
+4. Apply configuration to new instance
+5. Update instance ID in Parameter Store
 
-**環境変数**:
+**Environment Variables**:
 
-- `S3_BUCKET`: WireGuard 設定を保管する S3 バケット名
-- `PARAMETER_STORE_NAME`: インスタンス ID を保管する Parameter Store 名
+- `S3_BUCKET`: S3 bucket name storing WireGuard configuration
+- `PARAMETER_STORE_NAME`: Parameter Store name storing instance ID
 
-### ddns-updater 関数
+### ddns-updater Function
 
-**目的**: EC2 インスタンスの IP アドレスが変わった際に Cloudflare DNS レコードを更新
+**Purpose**: Update Cloudflare DNS record when EC2 instance IP address changes
 
-**トリガー**: EventBridge (EC2 State Change) または Lambda 直接呼び出し
+**Trigger**: EventBridge (EC2 State Change) or direct Lambda invocation
 
-**処理フロー**:
+**Processing Flow**:
 
-1. 新しいインスタンスの Public IP を取得
-2. Cloudflare API を使用して DNS レコードを更新
+1. Get Public IP of the new instance
+2. Update DNS record using Cloudflare API
 
-**環境変数**:
+**Environment Variables**:
 
-- `CLOUDFLARE_API_TOKEN`: Cloudflare API トークン（Parameter Store から取得）
+- `CLOUDFLARE_API_TOKEN`: Cloudflare API token (retrieved from Parameter Store)
 - `CLOUDFLARE_ZONE_ID`: Cloudflare Zone ID
-- `CLOUDFLARE_RECORD_ID`: 更新対象の DNS レコード ID
+- `CLOUDFLARE_RECORD_ID`: DNS record ID to update
 
 ## Cloudflare API
 
-### エンドポイント
+### Endpoint
 
 ```
 PATCH https://api.cloudflare.com/client/v4/zones/{zone_id}/dns_records/{record_id}
 ```
 
-### 必要な情報
+### Required Information
 
-- Zone ID: Cloudflare ダッシュボードから取得
-- Record ID: 既存の A レコードの ID
-- API Token: DNS 編集権限を持つトークン
+- Zone ID: Obtain from Cloudflare dashboard
+- Record ID: ID of existing A record
+- API Token: Token with DNS edit permissions
 
-## テスト
+## Testing
 
 ```bash
-# 特定の Lambda 関数のテスト実行
+# Run tests for specific Lambda function
 npm test -- --testPathPattern=recovery
 npm test -- --testPathPattern=ddns-updater
 ```
 
-### テスト規約
+### Testing Conventions
 
-- テストファイルは `__tests__/` ディレクトリに配置
-- ファイル名は `*.test.ts` または `*.spec.ts`
-- 環境変数のモックを適切に設定
-- AWS SDK の呼び出しをモック化
+- Place test files in `__tests__/` directory
+- File names should be `*.test.ts` or `*.spec.ts`
+- Properly set up environment variable mocks
+- Mock AWS SDK calls
 
-## エラーハンドリング
+## Error Handling
 
 ```typescript
 try {
@@ -102,10 +102,10 @@ try {
 }
 ```
 
-## ベストプラクティス
+## Best Practices
 
-- Lambda 関数はステートレスに保つ
-- タイムアウト値は処理時間 + バッファを考慮
-- リトライロジックを実装（冪等性を確保）
-- 構造化ログを使用（JSON 形式）
-- メモリ使用量を最適化（コスト削減）
+- Keep Lambda functions stateless
+- Set timeout values considering processing time + buffer
+- Implement retry logic (ensure idempotency)
+- Use structured logs (JSON format)
+- Optimize memory usage (cost reduction)

@@ -1,24 +1,24 @@
 # Copilot Instructions
 
-**詳細情報**: プロジェクト概要、アーキテクチャ、セットアップ手順、コーディング規約などは [AGENTS.md](../AGENTS.md) および各ディレクトリの AGENTS.md を参照すること。
+**Detailed Information**: For project overview, architecture, setup procedures, and coding conventions, refer to [AGENTS.md](../AGENTS.md) and the AGENTS.md files in each directory.
 
-## GitHub Copilot 固有の指示
+## GitHub Copilot Specific Instructions
 
-- **Rule of thumb**: 不明点はユーザーに確認する。
-- **Keep the context**: 長い回答は`.github/tmp`ディレクトリに`response-YYYYMMDDHHmmss.md`に一時保存し、次のリクエストに再利用できるようにする
+- **Rule of thumb**: Ask the user for clarification on unclear points.
+- **Keep the context**: Save long responses temporarily in `.github/tmp` directory as `response-YYYYMMDDHHmmss.md` for reuse in subsequent requests
 
-### 回答生成時の注意点
+### Guidelines for Response Generation
 
-- 回答は日本語で提供
-- 絵文字は使用しない
-- ユーザーの意見に対する批評(否定、肯定)は明確に、曖昧なリアクションは避ける
-- 簡潔に、要点を押さえて提供
-- 提案は視覚的にわかりやすい具体例(コードスニペット、diff など)を併記
-- 常に最新のベストプラクティスを確認
-- 対応関係は箇条書きや表を用いて効果的に説明(Pros and cons、トレードオフなど)
+- Provide responses **in Japanese**
+- Do not use emojis
+- Be clear when critiquing user opinions (whether agreeing or disagreeing); avoid ambiguous reactions
+- Keep responses concise and focused on key points
+- Accompany suggestions with visual, concrete examples (code snippets, diffs, etc.)
+- Always verify latest best practices
+- Use bullet points or tables to effectively explain relationships (pros and cons, trade-offs, etc.)
 
-### コード生成時の注意点・ガードレール
+### Code Generation Guidelines and Guardrails
 
-- シークレットのハードコード厳禁（API キー、トークン、秘密鍵など）
-- プッシュ系操作（CDK デプロイ、スクリプト実行、リモートリポジトリへのプッシュなど）の無断実行禁止
-- 依存関係の無断追加禁止
+- Never hardcode secrets (API keys, tokens, private keys, etc.)
+- Do not execute push operations without permission (CDK deploy, script execution, remote repository pushes, etc.)
+- Do not add dependencies without permission

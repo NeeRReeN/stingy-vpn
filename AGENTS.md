@@ -1,136 +1,136 @@
 # AGENTS.md
 
-このファイルは AI コーディングエージェント向けのプロジェクト全体概要を提供します。各サブディレクトリには詳細な AGENTS.md が配置されています。
+This file provides a project-wide overview for AI coding agents. Each subdirectory contains a detailed AGENTS.md file.
 
-## プロジェクト概要
+## Project Overview
 
-**stingy-vpn** は、AWS EC2 スポットインスタンスを活用した低コスト VPN ソリューションです。WireGuard を使用して自宅機と外出先機を EC2 経由で接続し、どこからでもセキュアな通信を実現します。
+**stingy-vpn** is a low-cost VPN solution leveraging AWS EC2 Spot Instances. It uses WireGuard to connect home and mobile devices via EC2, enabling secure communication from anywhere.
 
-### アーキテクチャ
+### Architecture
 
 ```
 ┌──────────────┐         ┌──────────────────────┐         ┌──────────────┐
-│   自宅機     │◄───────►│  EC2 Spot Instance   │◄───────►│   外出先機   │
+│ Home Device  │◄───────►│  EC2 Spot Instance   │◄───────►│Mobile Device │
 │  (WireGuard) │  WireGuard   │  (WireGuard Server)  │  WireGuard   │  (WireGuard) │
 └──────────────┘         └───────────┬──────────┘         └──────────────┘
                                    │
                                    ▼
                         ┌──────────────────────┐
                         │   Cloudflare DDNS    │
-                        │  (固定URLでアクセス)   │
+                        │  (Fixed URL access)  │
                         └──────────────────────┘
 ```
 
-### 主要技術スタック
+### Technology Stack
 
-- **言語**: TypeScript
-- **インフラ**: AWS CDK
-- **コンピュート**: EC2 スポットインスタンス、Lambda
-- **ストレージ**: S3（設定ファイル）、Parameter Store（インスタンス ID）
+- **Language**: TypeScript
+- **Infrastructure**: AWS CDK
+- **Compute**: EC2 Spot Instances, Lambda
+- **Storage**: S3 (configuration files), Parameter Store (instance ID)
 - **VPN**: WireGuard
-- **DNS**: Cloudflare DDNS（無料）
+- **DNS**: Cloudflare DDNS (free tier)
 
 ---
 
-## ディレクトリ構成と詳細ガイド
+## Directory Structure and Detailed Guides
 
-各ディレクトリには専用の AGENTS.md が配置されており、詳細な情報を提供しています。
+Each directory contains a dedicated AGENTS.md file providing detailed information.
 
 ```
 stingy-vpn/
-├── AGENTS.md                   # このファイル（プロジェクト全体概要）
+├── AGENTS.md                   # This file (project-wide overview)
 ├── README.md
 ├── .github/
-│   └── copilot-instructions.md # GitHub Copilot 向け簡潔な指示
+│   └── copilot-instructions.md # Concise instructions for GitHub Copilot
 ├── src/
-│   ├── cdk/                    # AWS CDK スタック
-│   │   └── AGENTS.md           # → CDK 開発の詳細ガイド
-│   ├── lambda/                 # Lambda 関数
-│   │   └── AGENTS.md           # → Lambda 開発の詳細ガイド
-│   └── config/                 # 設定関連
-│       └── AGENTS.md           # → 型定義・設定の詳細ガイド
-└── wireguard/                  # WireGuard 設定
-    └── AGENTS.md               # → WireGuard 設定の詳細ガイド
+│   ├── cdk/                    # AWS CDK stacks
+│   │   └── AGENTS.md           # → CDK development guide
+│   ├── lambda/                 # Lambda functions
+│   │   └── AGENTS.md           # → Lambda development guide
+│   └── config/                 # Configuration
+│       └── AGENTS.md           # → Type definitions and config guide
+└── wireguard/                  # WireGuard configuration
+    └── AGENTS.md               # → WireGuard setup guide
 ```
 
-**各ディレクトリの AGENTS.md を参照**:
+**Refer to AGENTS.md in each directory**:
 
-- [src/cdk/AGENTS.md](src/cdk/AGENTS.md) - AWS インフラ定義
-- [src/lambda/AGENTS.md](src/lambda/AGENTS.md) - Lambda 関数実装
-- [src/config/AGENTS.md](src/config/AGENTS.md) - 型定義・設定
-- [wireguard/AGENTS.md](wireguard/AGENTS.md) - VPN 設定
+- [src/cdk/AGENTS.md](src/cdk/AGENTS.md) - AWS infrastructure definitions
+- [src/lambda/AGENTS.md](src/lambda/AGENTS.md) - Lambda function implementation
+- [src/config/AGENTS.md](src/config/AGENTS.md) - Type definitions and configuration
+- [wireguard/AGENTS.md](wireguard/AGENTS.md) - VPN configuration
 
 ---
 
-## クイックスタート
+## Quick Start
 
-### セットアップ
+### Setup
 
 ```bash
-# 依存関係インストール
+# Install dependencies
 npm install
 
-# TypeScript ビルド
+# Build TypeScript
 npm run build
 
-# CDK ブートストラップ（初回のみ）
+# CDK bootstrap (first time only)
 npx cdk bootstrap
 
-# CDK デプロイ
+# CDK deploy
 npx cdk deploy
 ```
 
-### 開発コマンド
+### Development Commands
 
 ```bash
-# TypeScript の変更を監視
+# Watch for TypeScript changes
 npm run watch
 
-# 全テスト実行
+# Run all tests
 npm test
 
-# リント実行
+# Run linter
 npm run lint
 
-# CDK 差分確認
+# Check CDK diff
 npx cdk diff
 ```
 
 ---
 
-## PR ガイドライン
+## PR Guidelines
 
-### タイトル形式
+### Title Format
 
 ```
-[component] 変更内容の簡潔な説明
+[component] Brief description of changes
 ```
 
-例:
+Examples:
 
-- `[cdk] EC2 スポットインスタンスの設定追加`
-- `[lambda] DDNS 更新処理のリトライロジック実装`
-- `[wireguard] サーバー設定テンプレート更新`
+- `[cdk] Add EC2 spot instance configuration`
+- `[lambda] Implement retry logic for DDNS update`
+- `[wireguard] Update server configuration template`
 
-### PR チェックリスト
+### PR Checklist
 
-- [ ] `npm run lint` がパス
-- [ ] `npm test` がパス
-- [ ] 機密情報（秘密鍵、トークン）が含まれていないことを確認
-- [ ] 必要に応じて README や AGENTS.md を更新
-- [ ] CDK diff で意図した変更のみであることを確認
+- [ ] `npm run lint` passes
+- [ ] `npm test` passes
+- [ ] Confirm no sensitive information (private keys, tokens) is included
+- [ ] Update README or AGENTS.md as needed
+- [ ] Verify only intended changes via CDK diff
 
 ---
 
-## コスト最適化
+## Cost Optimization
 
-- **スポットインスタンス**: オンデマンドの最大 90%オフ
-- **t4g.nano/micro 推奨**: WireGuard は軽量なので十分
-- **Cloudflare 無料プラン**: DDNS には無料枠で対応可能
+- **Spot Instances**: Up to 90% off compared to on-demand
+- **t4g.nano/micro recommended**: WireGuard is lightweight, so these are sufficient
+- **Cloudflare free plan**: Free tier is adequate for DDNS
 
-## 将来の拡張案
+## Future Enhancements
 
-- [ ] Terraform への移行検討
-- [ ] 複数リージョン対応
-- [ ] モニタリング（CloudWatch Alarms）
-- [ ] 自動スケーリング対応
+- [ ] Consider migration to Terraform
+- [ ] Multi-region support
+- [ ] Monitoring (CloudWatch Alarms)
+- [ ] Auto-scaling support

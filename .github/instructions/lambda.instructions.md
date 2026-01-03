@@ -1,26 +1,26 @@
 ---
 applyTo: "**/lambda/**/*.ts"
-description: "AWS Lambda 関数開発のベストプラクティス"
+description: "AWS Lambda function development best practices"
 ---
 
-# Lambda 関数開発ガイドライン
+# Lambda Function Development Guidelines
 
-## 基本方針
+## Core Principles
 
-- Node.js 20.x ランタイム
-- ARM64 アーキテクチャ（コスト効率）
-- 単一責任: 1 Lambda = 1 機能
+- Node.js 20.x runtime
+- ARM64 architecture (cost efficiency)
+- Single responsibility: 1 Lambda = 1 function
 
-## ディレクトリ構造
+## Directory Structure
 
 ```
 src/lambda/
 ├── recovery/
-│   ├── index.ts        # ハンドラー
-│   ├── services/       # ビジネスロジック
+│   ├── index.ts        # Handler
+│   ├── services/       # Business logic
 │   │   ├── ec2.ts
 │   │   └── parameter-store.ts
-│   └── __tests__/      # テスト
+│   └── __tests__/      # Tests
 │       └── index.test.ts
 └── ddns-updater/
     ├── index.ts
@@ -29,14 +29,14 @@ src/lambda/
     └── __tests__/
 ```
 
-## ハンドラーパターン
+## Handler Patterns
 
-### 基本構造
+### Basic Structure
 
 ```typescript
 import type { EventBridgeEvent, Context } from "aws-lambda";
 
-// 型定義
+// Type definitions
 interface SpotInterruptionDetail {
   "instance-id": string;
   "instance-action": string;
@@ -47,7 +47,7 @@ type SpotInterruptionEvent = EventBridgeEvent<
   SpotInterruptionDetail
 >;
 
-// ハンドラー
+// Handler
 export const handler = async (
   event: SpotInterruptionEvent,
   context: Context
@@ -62,12 +62,12 @@ export const handler = async (
     console.info("Processing completed successfully");
   } catch (error) {
     console.error("Processing failed", { error });
-    throw error; // Lambda に失敗を通知
+    throw error; // Notify Lambda of failure
   }
 };
 ```
 
-### レスポンスパターン（API Gateway 連携時）
+### Response Pattern (API Gateway Integration)
 
 ```typescript
 import type { APIGatewayProxyHandler, APIGatewayProxyResult } from "aws-lambda";
@@ -96,10 +96,10 @@ function createResponse(
 }
 ```
 
-## 環境変数の取得
+## Environment Variable Retrieval
 
 ```typescript
-// ✅ 起動時にバリデーション
+// Validate at startup
 interface EnvConfig {
   parameterStorePrefix: string;
   cloudflareZoneId: string;
@@ -125,11 +125,11 @@ function loadConfig(): EnvConfig {
   };
 }
 
-// モジュールレベルで初期化（コールドスタート時に1回）
+// Initialize at module level (once during cold start)
 const config = loadConfig();
 ```
 
-## AWS SDK の使用
+## AWS SDK Usage
 
 ```typescript
 import {
@@ -139,15 +139,15 @@ import {
 } from "@aws-sdk/client-ssm";
 import { EC2Client, RunInstancesCommand } from "@aws-sdk/client-ec2";
 
-// クライアントはモジュールレベルで初期化（再利用）
+// Initialize clients at module level (reuse)
 const ssmClient = new SSMClient({});
 const ec2Client = new EC2Client({});
 
-// Parameter Store から値を取得
+// Get value from Parameter Store
 async function getParameter(name: string): Promise<string> {
   const command = new GetParameterCommand({
     Name: name,
-    WithDecryption: true, // SecureString の場合
+    WithDecryption: true, // For SecureString
   });
 
   const response = await ssmClient.send(command);
@@ -159,7 +159,7 @@ async function getParameter(name: string): Promise<string> {
   return response.Parameter.Value;
 }
 
-// Parameter Store に値を保存
+// Save value to Parameter Store
 async function putParameter(name: string, value: string): Promise<void> {
   const command = new PutParameterCommand({
     Name: name,
@@ -171,9 +171,9 @@ async function putParameter(name: string, value: string): Promise<void> {
 }
 ```
 
-## 外部 API 呼び出し
+## External API Calls
 
-### Cloudflare API 例
+### Cloudflare API Example
 
 ```typescript
 interface CloudflareResponse<T> {
@@ -228,7 +228,7 @@ async function updateDnsRecord(
 }
 ```
 
-## リトライ処理
+## Retry Processing
 
 ```typescript
 interface RetryOptions {
@@ -277,14 +277,14 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// 使用例
+// Usage example
 const record = await withRetry(() => updateDnsRecord(zoneId, recordId, ip));
 ```
 
-## ログ出力
+## Log Output
 
 ```typescript
-// ✅ 構造化ログ
+// Structured logging
 console.info("DNS record updated", {
   zoneId,
   recordId,
@@ -293,7 +293,7 @@ console.info("DNS record updated", {
   ttl: record.ttl,
 });
 
-// ✅ エラーログにはコンテキストを含める
+// Include context in error logs
 console.error("Failed to update DNS record", {
   error:
     error instanceof Error
@@ -307,11 +307,11 @@ console.error("Failed to update DNS record", {
   recordId,
 });
 
-// ❌ 避ける: シークレットをログに出力
+// Avoid: logging secrets
 console.log("Using token:", apiToken); // NG!
 ```
 
-## テスト
+## Testing
 
 ```typescript
 import { handler } from "../index";
@@ -323,7 +323,7 @@ const ssmMock = mockClient(SSMClient);
 describe("Recovery Lambda", () => {
   beforeEach(() => {
     ssmMock.reset();
-    // 環境変数をモック
+    // Mock environment variables
     process.env.PARAMETER_STORE_PREFIX = "/stingy-vpn/test";
   });
 
@@ -358,13 +358,13 @@ const mockContext = {
 } as any;
 ```
 
-## パフォーマンス最適化
+## Performance Optimization
 
 ```typescript
-// ✅ SDK クライアントはモジュールレベルで初期化
+// Initialize SDK clients at module level
 const ssmClient = new SSMClient({});
 
-// ✅ 頻繁にアクセスする値はキャッシュ
+// Cache frequently accessed values
 let cachedToken: string | undefined;
 let tokenExpiresAt: number = 0;
 
@@ -378,7 +378,7 @@ async function getCloudflareToken(): Promise<string> {
   cachedToken = await getParameter(
     `${config.parameterStorePrefix}/cloudflare-token`
   );
-  tokenExpiresAt = now + 5 * 60 * 1000; // 5分キャッシュ
+  tokenExpiresAt = now + 5 * 60 * 1000; // Cache for 5 minutes
 
   return cachedToken;
 }

@@ -1,28 +1,28 @@
-# 設定・型定義ガイド
+# Configuration and Type Definition Guide
 
-このディレクトリには共通の設定ファイルと型定義が含まれます。
+This directory contains common configuration files and type definitions.
 
-## 概要
+## Overview
 
-プロジェクト全体で使用される型定義、定数、設定を管理します。
+Manages type definitions, constants, and configurations used throughout the project.
 
-## ファイル構成
+## File Structure
 
 ```
 config/
-└── types.ts            # 共通型定義
+└── types.ts            # Common type definitions
 ```
 
-## 型定義の原則
+## Type Definition Principles
 
-- すべての型は `types.ts` に集約
-- インターフェースは `PascalCase`
-- 型エイリアスも `PascalCase`
-- 定数は `UPPER_SNAKE_CASE`
+- All types are consolidated in `types.ts`
+- Interfaces use `PascalCase`
+- Type aliases also use `PascalCase`
+- Constants use `UPPER_SNAKE_CASE`
 
-## 主要な型定義
+## Key Type Definitions
 
-### WireGuard 設定
+### WireGuard Configuration
 
 ```typescript
 interface WireGuardConfig {
@@ -34,7 +34,7 @@ interface WireGuardConfig {
 }
 ```
 
-### AWS リソース設定
+### AWS Resource Configuration
 
 ```typescript
 interface VpnStackConfig {
@@ -45,7 +45,7 @@ interface VpnStackConfig {
 }
 ```
 
-### Cloudflare 設定
+### Cloudflare Configuration
 
 ```typescript
 interface CloudflareConfig {
@@ -56,7 +56,7 @@ interface CloudflareConfig {
 }
 ```
 
-## 環境変数の型定義
+## Environment Variable Type Definitions
 
 ```typescript
 interface EnvironmentVariables {
@@ -67,9 +67,9 @@ interface EnvironmentVariables {
 }
 ```
 
-## ベストプラクティス
+## Best Practices
 
-- `any` を使用しない（`unknown` + 型ガードを使用）
-- オプショナルプロパティは `?` を使用
-- リテラル型を活用して型安全性を向上
-- Utility Types を活用（`Partial`, `Required`, `Pick`, `Omit` など）
+- Do not use `any` (use `unknown` + type guards)
+- Use `?` for optional properties
+- Utilize literal types to improve type safety
+- Leverage Utility Types (`Partial`, `Required`, `Pick`, `Omit`, etc.)

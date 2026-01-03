@@ -1,60 +1,60 @@
-# CDK スタック開発ガイド
+# CDK Stack Development Guide
 
-このディレクトリには AWS CDK スタック定義が含まれます。
+This directory contains AWS CDK stack definitions.
 
-## 概要
+## Overview
 
-stingy-vpn の AWS インフラストラクチャを定義する CDK スタックです。
+CDK stacks that define the AWS infrastructure for stingy-vpn.
 
-## 主要リソース
+## Key Resources
 
-### デプロイされるリソース
+### Deployed Resources
 
-| リソース                 | 用途                              |
-| ------------------------ | --------------------------------- |
-| EC2 スポットインスタンス | WireGuard サーバー                |
-| Lambda (Recovery)        | スポット中断時の復旧処理          |
-| Lambda (DDNS Updater)    | Cloudflare DNS レコード更新       |
-| S3 バケット              | WireGuard サーバー設定保管        |
-| Parameter Store          | インスタンス ID、API トークン保管 |
-| EventBridge              | スポット中断イベント検知          |
-| IAM ロール               | Lambda 実行権限                   |
+| Resource              | Purpose                                    |
+| --------------------- | ------------------------------------------ |
+| EC2 Spot Instance     | WireGuard server                           |
+| Lambda (Recovery)     | Recovery handling during spot interruption |
+| Lambda (DDNS Updater) | Cloudflare DNS record updates              |
+| S3 Bucket             | WireGuard server configuration storage     |
+| Parameter Store       | Instance ID, API token storage             |
+| EventBridge           | Spot interruption event detection          |
+| IAM Roles             | Lambda execution permissions               |
 
-## CDK コマンド
+## CDK Commands
 
 ```bash
-# CDK スタックの差分確認
+# Check CDK stack diff
 npx cdk diff
 
-# CDK デプロイ
+# CDK deploy
 npx cdk deploy
 
-# CDK スタック削除
+# CDK stack destroy
 npx cdk destroy
 
-# CloudFormation テンプレート生成
+# Generate CloudFormation template
 npx cdk synth
 ```
 
-## スポットインスタンス復旧フロー
+## Spot Instance Recovery Flow
 
-1. EventBridge がスポット中断イベントを検知
-2. Recovery Lambda が起動
-3. 新しいスポットインスタンスをリクエスト
-4. S3 から WireGuard 設定を取得・適用
-5. Parameter Store のインスタンス ID を更新
-6. DDNS Updater Lambda で Cloudflare DNS を更新
+1. EventBridge detects spot interruption event
+2. Recovery Lambda is triggered
+3. Request a new spot instance
+4. Retrieve and apply WireGuard configuration from S3
+5. Update instance ID in Parameter Store
+6. DDNS Updater Lambda updates Cloudflare DNS
 
-## コーディング規約
+## Coding Conventions
 
-- CDK Construct は再利用可能なように設計
-- `constructs/` ディレクトリに分離可能
-- リソース名にはプロジェクト名をプレフィックスとして付与
-- タグを適切に設定（コスト管理・リソース識別のため）
+- Design CDK Constructs to be reusable
+- Can be separated into `constructs/` directory
+- Prefix resource names with project name
+- Set appropriate tags (for cost management and resource identification)
 
-## ベストプラクティス
+## Best Practices
 
-- スポットインスタンスの中断ハンドリングを必ず実装
-- IAM ポリシーは最小権限の原則を遵守
-- Parameter Store にはセキュアな値のみを保管
-- S3 バケットには暗号化を有効化
+- Always implement spot instance interruption handling
+- Follow the principle of least privilege for IAM policies
+- Store only secure values in Parameter Store
+- Enable encryption for S3 buckets
