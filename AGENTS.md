@@ -114,11 +114,7 @@ Examples:
 
 ### PR Checklist
 
-- [ ] `npm run lint` passes
-- [ ] `npm test` passes
-- [ ] Confirm no sensitive information (private keys, tokens) is included
-- [ ] Update README or AGENTS.md as needed
-- [ ] Verify only intended changes via CDK diff
+- See `.github/PULL_REQUEST_TEMPLATE.md`
 
 ---
 
