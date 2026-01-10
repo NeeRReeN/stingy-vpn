@@ -1,0 +1,210 @@
+<mxfile host="app.diagrams.net" modified="2026-01-10T00:00:00.000Z" agent="GitHub Copilot" version="22.1.16" etag="generated" type="device">
+  <diagram name="Stingy VPN Architecture" id="stingy-vpn-arch">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- AWS Cloud -->
+        <mxCell id="aws-cloud" value="" style="sketch=0;outlineConnect=0;gradientColor=none;html=1;whiteSpace=wrap;fontSize=12;fontStyle=0;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_aws_cloud;strokeColor=#232F3E;fillColor=none;verticalAlign=top;align=left;spacingLeft=30;fontColor=#232F3E;dashed=0;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="1080" height="680" as="geometry" />
+        </mxCell>
+        
+        <!-- VPC -->
+        <mxCell id="vpc" value="VPC (10.0.0.0/16)" style="sketch=0;outlineConnect=0;gradientColor=none;html=1;whiteSpace=wrap;fontSize=12;fontStyle=0;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_vpc;strokeColor=#248814;fillColor=none;verticalAlign=top;align=left;spacingLeft=30;fontColor=#AAB7B8;dashed=0;" vertex="1" parent="1">
+          <mxGeometry x="80" y="100" width="480" height="280" as="geometry" />
+        </mxCell>
+        
+        <!-- Public Subnet -->
+        <mxCell id="subnet" value="Public Subnet&#xa;10.0.1.0/24" style="sketch=0;outlineConnect=0;gradientColor=none;html=1;whiteSpace=wrap;fontSize=11;fontStyle=0;shape=mxgraph.aws4.group;grIcon=mxgraph.aws4.group_subnet;strokeColor=#879196;fillColor=none;verticalAlign=top;align=left;spacingLeft=30;fontColor=#879196;dashed=0;" vertex="1" parent="1">
+          <mxGeometry x="120" y="150" width="400" height="200" as="geometry" />
+        </mxCell>
+        
+        <!-- EC2 Spot Instance -->
+        <mxCell id="ec2-spot" value="EC2 Spot Instance&#xa;t4g.nano (ARM64)&#xa;WireGuard Server&#xa;Public IP" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#ED7100;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.ec2_instance;" vertex="1" parent="1">
+          <mxGeometry x="280" y="200" width="78" height="78" as="geometry" />
+        </mxCell>
+        
+        <!-- Security Group -->
+        <mxCell id="sg" value="Security Group&#xa;UDP 51820&#xa;TCP 22" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#8C4FFF;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.security_group;" vertex="1" parent="1">
+          <mxGeometry x="160" y="200" width="60" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- Internet Gateway -->
+        <mxCell id="igw" value="Internet&#xa;Gateway" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#8C4FFF;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.internet_gateway;" vertex="1" parent="1">
+          <mxGeometry x="440" y="200" width="60" height="60" as="geometry" />
+        </mxCell>
+        
+        <!-- EventBridge -->
+        <mxCell id="eventbridge" value="EventBridge Rule&#xa;Spot Interruption&#xa;Warning" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;gradientColor=#FF4F8B;gradientDirection=north;fillColor=#BC1356;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.eventbridge;" vertex="1" parent="1">
+          <mxGeometry x="280" y="420" width="78" height="78" as="geometry" />
+        </mxCell>
+        
+        <!-- Recovery Lambda -->
+        <mxCell id="lambda-recovery" value="Recovery Handler&#xa;Lambda&#xa;(Node.js 20 ARM64)" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;gradientColor=#F78E04;gradientDirection=north;fillColor=#D05C17;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.lambda;" vertex="1" parent="1">
+          <mxGeometry x="120" y="560" width="78" height="78" as="geometry" />
+        </mxCell>
+        
+        <!-- DDNS Lambda -->
+        <mxCell id="lambda-ddns" value="DDNS Updater&#xa;Lambda&#xa;(Node.js 20 ARM64)" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;gradientColor=#F78E04;gradientDirection=north;fillColor=#D05C17;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.lambda;" vertex="1" parent="1">
+          <mxGeometry x="440" y="560" width="78" height="78" as="geometry" />
+        </mxCell>
+        
+        <!-- Parameter Store -->
+        <mxCell id="parameter-store" value="Systems Manager&#xa;Parameter Store&#xa;&#xa;/stingy-vpn/{env}/&#xa;- instance-id&#xa;- cloudflare-token&#xa;- wireguard-config" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;gradientColor=#F34482;gradientDirection=north;fillColor=#BC1356;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=10;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.systems_manager;" vertex="1" parent="1">
+          <mxGeometry x="720" y="420" width="78" height="78" as="geometry" />
+        </mxCell>
+        
+        <!-- CloudWatch Logs -->
+        <mxCell id="cloudwatch" value="CloudWatch&#xa;Logs &amp; Metrics" style="sketch=0;points=[[0,0,0],[0.25,0,0],[0.5,0,0],[0.75,0,0],[1,0,0],[0,1,0],[0.25,1,0],[0.5,1,0],[0.75,1,0],[1,1,0],[0,0.25,0],[0,0.5,0],[0,0.75,0],[1,0.25,0],[1,0.5,0],[1,0.75,0]];outlineConnect=0;fontColor=#232F3E;gradientColor=#F34482;gradientDirection=north;fillColor=#BC1356;strokeColor=#ffffff;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.cloudwatch_2;" vertex="1" parent="1">
+          <mxGeometry x="920" y="420" width="78" height="78" as="geometry" />
+        </mxCell>
+        
+        <!-- Cloudflare DNS -->
+        <mxCell id="cloudflare" value="Cloudflare DNS API&#xa;Dynamic DNS Update" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#232F3D;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.generic_database;" vertex="1" parent="1">
+          <mxGeometry x="720" y="560" width="78" height="78" as="geometry" />
+        </mxCell>
+        
+        <!-- VPN Client -->
+        <mxCell id="client" value="VPN Client&#xa;(WireGuard)" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#232F3D;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=11;fontStyle=0;aspect=fixed;pointerEvents=1;shape=mxgraph.aws4.client;" vertex="1" parent="1">
+          <mxGeometry x="720" y="150" width="78" height="76" as="geometry" />
+        </mxCell>
+        
+        <!-- Arrows -->
+        
+        <!-- EventBridge to EC2 -->
+        <mxCell id="arrow1" value="1. Spot Interruption&#xa;Warning (2 min)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=2;fontSize=10;fontColor=#E03C31;strokeColor=#E03C31;" edge="1" parent="1" source="eventbridge" target="ec2-spot">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- EventBridge to Recovery Lambda -->
+        <mxCell id="arrow2" value="2. Trigger" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="eventbridge" target="lambda-recovery">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Recovery Lambda to Parameter Store -->
+        <mxCell id="arrow3" value="3. Update&#xa;instance-id" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=2;fontSize=10;dashed=1;" edge="1" parent="1" source="lambda-recovery" target="parameter-store">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="280" y="599" />
+              <mxPoint x="280" y="459" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Recovery Lambda to EC2 (launch new) -->
+        <mxCell id="arrow4" value="4. Launch&#xa;New Spot" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=2;fontSize=10;strokeColor=#00AA00;" edge="1" parent="1" source="lambda-recovery" target="ec2-spot">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="159" y="239" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- Recovery Lambda to DDNS Lambda -->
+        <mxCell id="arrow5" value="5. Invoke" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="lambda-recovery" target="lambda-ddns">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- DDNS Lambda to Parameter Store -->
+        <mxCell id="arrow6" value="6. Get&#xa;instance-id" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=2;fontSize=10;dashed=1;" edge="1" parent="1" source="lambda-ddns" target="parameter-store">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- DDNS Lambda to Cloudflare -->
+        <mxCell id="arrow7" value="7. Update DNS" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=2;fontSize=10;" edge="1" parent="1" source="lambda-ddns" target="cloudflare">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Client to Cloudflare -->
+        <mxCell id="arrow8" value="DNS Query" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=2;fontSize=10;dashed=1;" edge="1" parent="1" source="client" target="cloudflare">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Client to EC2 -->
+        <mxCell id="arrow9" value="8. WireGuard&#xa;Connection&#xa;(UDP 51820)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=3;fontSize=10;strokeColor=#0066CC;" edge="1" parent="1" source="client" target="ec2-spot">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Lambda to CloudWatch -->
+        <mxCell id="arrow10" value="Logs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0;entryY=0.75;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=1;fontSize=9;dashed=1;strokeColor=#999999;" edge="1" parent="1" source="lambda-recovery" target="cloudwatch">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="840" y="580" />
+              <mxPoint x="840" y="479" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="arrow11" value="Logs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.25;entryY=1;entryDx=0;entryDy=0;entryPerimeter=0;strokeWidth=1;fontSize=9;dashed=1;strokeColor=#999999;" edge="1" parent="1" source="lambda-ddns" target="cloudwatch">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <!-- Title -->
+        <mxCell id="title" value="Stingy VPN - AWS Architecture (Spot Instance Based VPN with Auto-Recovery)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;fontColor=#232F3E;" vertex="1" parent="1">
+          <mxGeometry x="40" y="10" width="1080" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- Legend -->
+        <mxCell id="legend-box" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#999999;" vertex="1" parent="1">
+          <mxGeometry x="880" y="560" width="240" height="140" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend-title" value="Legend" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="890" y="565" width="80" height="20" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="legend1" value="Data Flow" style="text;html=1;strokeColor=#0066CC;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="920" y="590" width="180" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-line1" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=3;strokeColor=#0066CC;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="890" y="597" as="sourcePoint" />
+            <mxPoint x="915" y="597" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="legend2" value="Event Trigger" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="920" y="610" width="180" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-line2" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="890" y="617" as="sourcePoint" />
+            <mxPoint x="915" y="617" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="legend3" value="API Call" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="920" y="630" width="180" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-line3" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;dashed=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="890" y="637" as="sourcePoint" />
+            <mxPoint x="915" y="637" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="legend4" value="New Instance Launch" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="920" y="650" width="180" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-line4" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;strokeColor=#00AA00;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="890" y="657" as="sourcePoint" />
+            <mxPoint x="915" y="657" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+        <mxCell id="legend5" value="Spot Interruption Alert" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="920" y="670" width="180" height="15" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-line5" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;strokeColor=#E03C31;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="890" y="677" as="sourcePoint" />
+            <mxPoint x="915" y="677" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
