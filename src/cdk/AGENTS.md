@@ -10,15 +10,14 @@ CDK stacks that define the AWS infrastructure for stingy-vpn.
 
 ### Deployed Resources
 
-| Resource              | Purpose                                    |
-| --------------------- | ------------------------------------------ |
-| EC2 Spot Instance     | WireGuard server                           |
-| Lambda (Recovery)     | Recovery handling during spot interruption |
-| Lambda (DDNS Updater) | Cloudflare DNS record updates              |
-| S3 Bucket             | WireGuard server configuration storage     |
-| Parameter Store       | Instance ID, API token storage             |
-| EventBridge           | Spot interruption event detection          |
-| IAM Roles             | Lambda execution permissions               |
+| Resource              | Purpose                                     |
+| --------------------- | ------------------------------------------- |
+| EC2 Spot Instance     | WireGuard server                            |
+| Lambda (Recovery)     | Recovery handling during spot interruption  |
+| Lambda (DDNS Updater) | Cloudflare DNS record updates               |
+| Parameter Store       | Configuration, secrets, instance ID storage |
+| EventBridge           | Spot interruption event detection           |
+| IAM Roles             | Lambda execution permissions                |
 
 ## CDK Commands
 
@@ -41,7 +40,7 @@ npx cdk synth
 1. EventBridge detects spot interruption event
 2. Recovery Lambda is triggered
 3. Request a new spot instance
-4. Retrieve and apply WireGuard configuration from S3
+4. WireGuard configuration is retrieved from Parameter Store via UserData script
 5. Update instance ID in Parameter Store
 6. DDNS Updater Lambda updates Cloudflare DNS
 
@@ -56,5 +55,5 @@ npx cdk synth
 
 - Always implement spot instance interruption handling
 - Follow the principle of least privilege for IAM policies
-- Store only secure values in Parameter Store
-- Enable encryption for S3 buckets
+- Use SecureString type for sensitive values in Parameter Store
+- Enable detailed CloudWatch logging for troubleshooting

@@ -34,14 +34,14 @@ src/
 
 1. Receive interruption event
 2. Request a new spot instance
-3. Retrieve WireGuard configuration from S3
-4. Apply configuration to new instance
-5. Update instance ID in Parameter Store
+3. WireGuard configuration is retrieved from Parameter Store via UserData script
+4. Update instance ID in Parameter Store
+5. Invoke DDNS updater Lambda
 
 **Environment Variables**:
 
-- `S3_BUCKET`: S3 bucket name storing WireGuard configuration
-- `PARAMETER_STORE_NAME`: Parameter Store name storing instance ID
+- `PARAMETER_STORE_PREFIX`: Parameter Store prefix (e.g., `/stingy-vpn/prod`)
+- `LAUNCH_TEMPLATE_ID`: EC2 Launch Template ID
 
 ### ddns-updater Function
 
