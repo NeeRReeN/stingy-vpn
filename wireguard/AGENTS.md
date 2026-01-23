@@ -24,7 +24,7 @@ wireguard/
 
 ```ini
 [Interface]
-Address = 10.0.0.5
+Address = 10.0.0.5/24
 ListenPort = 51820
 PrivateKey = <SERVER_PRIVATE_KEY>  # Retrieved from Parameter Store
 
@@ -41,7 +41,7 @@ AllowedIPs = 10.0.0.7/32
 
 ### Configuration Notes
 
-- Server uses `10.0.0.5`
+- Server uses `10.0.0.5/24`
 - Port `51820` is the WireGuard default
 - Each client is assigned a unique IP address
 
