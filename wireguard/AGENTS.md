@@ -14,8 +14,8 @@ wireguard/
 │   └── wg0.conf
 ├── client/                 # Client configuration (gitignored)
 │   ├── .gitkeep
-│   ├── home.conf.example       # Home device template (tracked)
-│   └── mobile.conf.example     # Mobile device template (tracked)
+│   ├── home.example.conf       # Home device template (tracked)
+│   └── mobile.example.conf     # Mobile device template (tracked)
 ```
 
 ## Server Configuration
@@ -24,24 +24,24 @@ wireguard/
 
 ```ini
 [Interface]
-Address = 10.0.0.1/24
+Address = 10.0.0.5/24
 ListenPort = 51820
 PrivateKey = <SERVER_PRIVATE_KEY>  # Retrieved from Parameter Store
 
 # Home device
 [Peer]
 PublicKey = <HOME_DEVICE_PUBLIC_KEY>
-AllowedIPs = 10.0.0.2/32
+AllowedIPs = 10.0.0.6/32
 
 # Mobile device
 [Peer]
 PublicKey = <MOBILE_DEVICE_PUBLIC_KEY>
-AllowedIPs = 10.0.0.3/32
+AllowedIPs = 10.0.0.7/32
 ```
 
 ### Configuration Notes
 
-- Server uses `10.0.0.1/24`
+- Server uses `10.0.0.5/24`
 - Port `51820` is the WireGuard default
 - Each client is assigned a unique IP address
 
@@ -88,7 +88,7 @@ wg pubkey < privatekey > publickey
 ### Safe to Commit
 
 - **Public keys** (`PublicKey`)
-- **Configuration templates** (`*.conf.example`)
+- **Configuration templates** (`*.example.conf`)
 - **Server configuration template** (private key as placeholder)
 
 ## Applying WireGuard Configuration
