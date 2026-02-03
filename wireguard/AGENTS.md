@@ -10,7 +10,7 @@ WireGuard is a modern, fast VPN protocol. In this project, we use an EC2 instanc
 
 ```
 wireguard/
-├── server/                 # Server configuration (uploaded to S3)
+├── server/                 # Server configuration (stored in Parameter Store)
 │   └── wg0.conf
 ├── client/                 # Client configuration (gitignored)
 │   ├── .gitkeep

@@ -26,7 +26,7 @@ This file provides a project-wide overview for AI coding agents. Each subdirecto
 - **Language**: TypeScript
 - **Infrastructure**: AWS CDK
 - **Compute**: EC2 Spot Instances, Lambda
-- **Storage**: S3 (configuration files), Parameter Store (instance ID)
+- **Storage**: Parameter Store (configuration, secrets, instance ID)
 - **VPN**: WireGuard
 - **DNS**: Cloudflare DDNS (free tier)
 
