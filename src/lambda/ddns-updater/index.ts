@@ -45,7 +45,11 @@ function loadConfig(): EnvConfig {
   const parameterStorePrefix = process.env.PARAMETER_STORE_PREFIX;
   const cloudflareZoneId = process.env.CLOUDFLARE_ZONE_ID;
   const cloudflareRecordId = process.env.CLOUDFLARE_RECORD_ID;
-  const logLevel = (process.env.LOG_LEVEL ?? "info") as EnvConfig["logLevel"];
+  const validLogLevels: EnvConfig["logLevel"][] = ["debug", "info", "warn", "error"];
+  const rawLogLevel = process.env.LOG_LEVEL ?? "info";
+  const logLevel = validLogLevels.includes(rawLogLevel as EnvConfig["logLevel"])
+    ? (rawLogLevel as EnvConfig["logLevel"])
+    : "info";
 
   if (!parameterStorePrefix || !cloudflareZoneId || !cloudflareRecordId) {
     throw new Error("Missing required environment variables");

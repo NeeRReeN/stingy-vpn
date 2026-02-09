@@ -23,9 +23,7 @@ type SpotInterruptionEvent = EventBridgeEvent<
 
 interface EnvConfig {
   parameterStorePrefix: string;
-  vpcId: string;
   subnetId: string;
-  securityGroupId: string;
   launchTemplateId: string;
   logLevel: "debug" | "info" | "warn" | "error";
 }
@@ -37,17 +35,17 @@ const ssmClient = new SSMClient({});
 // Load configuration from environment variables
 function loadConfig(): EnvConfig {
   const parameterStorePrefix = process.env.PARAMETER_STORE_PREFIX;
-  const vpcId = process.env.VPC_ID;
   const subnetId = process.env.SUBNET_ID;
-  const securityGroupId = process.env.SECURITY_GROUP_ID;
   const launchTemplateId = process.env.LAUNCH_TEMPLATE_ID;
-  const logLevel = (process.env.LOG_LEVEL ?? "info") as EnvConfig["logLevel"];
+  const validLogLevels: EnvConfig["logLevel"][] = ["debug", "info", "warn", "error"];
+  const rawLogLevel = process.env.LOG_LEVEL ?? "info";
+  const logLevel = validLogLevels.includes(rawLogLevel as EnvConfig["logLevel"])
+    ? (rawLogLevel as EnvConfig["logLevel"])
+    : "info";
 
   if (
     !parameterStorePrefix ||
-    !vpcId ||
     !subnetId ||
-    !securityGroupId ||
     !launchTemplateId
   ) {
     throw new Error("Missing required environment variables");
@@ -55,9 +53,7 @@ function loadConfig(): EnvConfig {
 
   return {
     parameterStorePrefix,
-    vpcId,
     subnetId,
-    securityGroupId,
     launchTemplateId,
     logLevel,
   };
@@ -213,11 +209,16 @@ export const handler = async (
       `${config.parameterStorePrefix}/instance-id`
     );
 
+    // If the instance ID parameter is still in its initial state, ignore the event
+    if (currentInstanceId === "initial") {
+      log("info", "Instance ID not initialized; ignoring spot interruption event", {
+        interruptedInstanceId,
+      });
+      return;
+    }
+
     // Only process if this is our managed instance
-    if (
-      currentInstanceId !== interruptedInstanceId &&
-      currentInstanceId !== "initial"
-    ) {
+    if (currentInstanceId !== interruptedInstanceId) {
       log("info", "Ignoring interruption for unmanaged instance", {
         interruptedInstanceId,
         currentInstanceId,
