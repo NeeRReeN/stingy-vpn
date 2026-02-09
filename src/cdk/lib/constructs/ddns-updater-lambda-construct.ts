@@ -51,7 +51,6 @@ export class DdnsUpdaterLambdaConstruct extends Construct {
       bundling: {
         minify: props.environment === "prod",
         sourceMap: props.environment !== "prod",
-        externalModules: ["@aws-sdk/*"],
       },
       logRetention: logs.RetentionDays.TWO_WEEKS,
     });
@@ -61,7 +60,9 @@ export class DdnsUpdaterLambdaConstruct extends Construct {
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: ["ssm:GetParameter", "ssm:GetParameters"],
-        resources: [`arn:aws:ssm:*:*:parameter${props.parameterStorePrefix}/*`],
+        resources: [
+          `arn:aws:ssm:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:parameter${props.parameterStorePrefix}/*`,
+        ],
       })
     );
 

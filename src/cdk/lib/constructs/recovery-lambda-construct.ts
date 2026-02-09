@@ -20,6 +20,8 @@ export interface RecoveryLambdaConstructProps {
   readonly securityGroupId: string;
   /** Launch template ID */
   readonly launchTemplateId: string;
+  /** EC2 instance role ARN (for iam:PassRole restriction) */
+  readonly ec2RoleArn: string;
 }
 
 /**
@@ -57,7 +59,6 @@ export class RecoveryLambdaConstruct extends Construct {
       bundling: {
         minify: props.environment === "prod",
         sourceMap: props.environment !== "prod",
-        externalModules: ["@aws-sdk/*"],
       },
       logRetention: logs.RetentionDays.TWO_WEEKS,
     });
@@ -67,7 +68,9 @@ export class RecoveryLambdaConstruct extends Construct {
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: ["ssm:GetParameter", "ssm:GetParameters", "ssm:PutParameter"],
-        resources: [`arn:aws:ssm:*:*:parameter${props.parameterStorePrefix}/*`],
+        resources: [
+          `arn:aws:ssm:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:parameter${props.parameterStorePrefix}/*`,
+        ],
       })
     );
 
@@ -99,7 +102,7 @@ export class RecoveryLambdaConstruct extends Construct {
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: ["iam:PassRole"],
-        resources: ["*"],
+        resources: [props.ec2RoleArn],
         conditions: {
           StringEquals: {
             "iam:PassedToService": "ec2.amazonaws.com",
