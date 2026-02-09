@@ -5,8 +5,6 @@ import { Construct } from "constructs";
 export interface VpcConstructProps {
   /** VPC CIDR block */
   readonly vpcCidr: string;
-  /** Public subnet CIDR block */
-  readonly subnetCidr: string;
   /** WireGuard UDP port */
   readonly wireguardPort: number;
   /** Enable SSH access (TCP 22) */
