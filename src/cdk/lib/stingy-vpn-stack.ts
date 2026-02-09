@@ -61,7 +61,6 @@ export class StingyVpnStack extends cdk.Stack {
     // ========================================
     const vpcConstruct = new VpcConstruct(this, "Vpc", {
       vpcCidr,
-      subnetCidr: DEFAULT_CONFIG.subnetCidr,
       wireguardPort,
       enableSsh: environment === "dev",
     });
@@ -73,7 +72,7 @@ export class StingyVpnStack extends cdk.Stack {
     // ========================================
 
     // Instance ID parameter (updated by Lambda)
-    const instanceIdParam = new ssm.StringParameter(this, "InstanceIdParam", {
+    new ssm.StringParameter(this, "InstanceIdParam", {
       parameterName: `${parameterStorePrefix}/instance-id`,
       stringValue: "initial",
       description: "Current spot instance ID",
@@ -81,16 +80,7 @@ export class StingyVpnStack extends cdk.Stack {
     });
 
     // Launch Template ID parameter
-    const launchTemplateIdParam = new ssm.StringParameter(
-      this,
-      "LaunchTemplateIdParam",
-      {
-        parameterName: `${parameterStorePrefix}/launch-template-id`,
-        stringValue: "initial", // Will be updated after launch template creation
-        description: "Launch template ID for spot instances",
-        tier: ssm.ParameterTier.STANDARD,
-      }
-    );
+    // Note: stringValue will be set after LaunchTemplate creation below
 
     // ========================================
     // IAM Role for EC2
@@ -125,11 +115,10 @@ export class StingyVpnStack extends cdk.Stack {
       "set -e",
       "",
       "# Update system",
-      "yum update -y",
+      "dnf update -y",
       "",
       "# Install WireGuard",
-      "amazon-linux-extras install epel -y || true",
-      "yum install -y wireguard-tools",
+      "dnf install -y wireguard-tools",
       "",
       "# Enable IP forwarding",
       'echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf',
@@ -171,42 +160,13 @@ export class StingyVpnStack extends cdk.Stack {
       associatePublicIpAddress: true,
     });
 
-    // Update launch template ID parameter
-    new cdk.CustomResource(this, "UpdateLaunchTemplateId", {
-      serviceToken: new cdk.aws_lambda.Function(this, "UpdateParamFunction", {
-        runtime: cdk.aws_lambda.Runtime.NODEJS_20_X,
-        architecture: cdk.aws_lambda.Architecture.ARM_64,
-        handler: "index.handler",
-        code: cdk.aws_lambda.Code.fromInline(`
-          const { SSMClient, PutParameterCommand } = require('@aws-sdk/client-ssm');
-          const client = new SSMClient({});
-          
-          exports.handler = async (event) => {
-            if (event.RequestType === 'Delete') {
-              return { PhysicalResourceId: event.PhysicalResourceId };
-            }
-            
-            await client.send(new PutParameterCommand({
-              Name: event.ResourceProperties.ParameterName,
-              Value: event.ResourceProperties.LaunchTemplateId,
-              Overwrite: true,
-            }));
-            
-            return { PhysicalResourceId: event.ResourceProperties.ParameterName };
-          };
-        `),
-        timeout: cdk.Duration.seconds(30),
-        initialPolicy: [
-          new iam.PolicyStatement({
-            actions: ["ssm:PutParameter"],
-            resources: [launchTemplateIdParam.parameterArn],
-          }),
-        ],
-      }).functionArn,
-      properties: {
-        ParameterName: launchTemplateIdParam.parameterName,
-        LaunchTemplateId: this.launchTemplate.launchTemplateId,
-      },
+    // Store launch template ID in Parameter Store
+    // CDK token resolves launchTemplateId at deploy time, so no CustomResource is needed
+    new ssm.StringParameter(this, "LaunchTemplateIdParam", {
+      parameterName: `${parameterStorePrefix}/launch-template-id`,
+      stringValue: this.launchTemplate.launchTemplateId!,
+      description: "Launch template ID for spot instances",
+      tier: ssm.ParameterTier.STANDARD,
     });
 
     // ========================================
@@ -221,6 +181,7 @@ export class StingyVpnStack extends cdk.Stack {
       subnetId: vpcConstruct.subnet.subnetId,
       securityGroupId: vpcConstruct.securityGroup.securityGroupId,
       launchTemplateId: this.launchTemplate.launchTemplateId!,
+      ec2RoleArn: ec2Role.roleArn,
     });
     this.recoveryFunction = recoveryLambda.function;
 
