@@ -17,7 +17,7 @@ export interface WireGuardConfig {
 export interface WireGuardPeer {
   readonly name: string;
   readonly publicKey: string;
-  readonly allowedIPs: string;
+  readonly allowedIPs: string[];
 }
 
 // AWS resource configuration
@@ -52,6 +52,10 @@ export interface ParameterStorePaths {
 export interface RecoveryLambdaEnv {
   readonly PARAMETER_STORE_PREFIX: string;
   readonly LOG_LEVEL: string;
+  readonly VPC_ID: string;
+  readonly SUBNET_ID: string;
+  readonly SECURITY_GROUP_ID: string;
+  readonly LAUNCH_TEMPLATE_ID: string;
 }
 
 export interface DdnsUpdaterLambdaEnv {
