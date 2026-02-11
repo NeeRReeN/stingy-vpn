@@ -46,7 +46,7 @@ export class StingyVpnStack extends cdk.Stack {
       environment,
       spotInstanceType = ec2.InstanceType.of(
         ec2.InstanceClass.T4G,
-        ec2.InstanceSize.NANO
+        ec2.InstanceSize.NANO,
       ),
       vpcCidr = DEFAULT_CONFIG.vpcCidr,
       wireguardPort = DEFAULT_CONFIG.wireguardPort,
@@ -90,7 +90,7 @@ export class StingyVpnStack extends cdk.Stack {
       description: "IAM role for WireGuard VPN EC2 instance",
       managedPolicies: [
         iam.ManagedPolicy.fromAwsManagedPolicyName(
-          "AmazonSSMManagedInstanceCore"
+          "AmazonSSMManagedInstanceCore",
         ),
       ],
     });
@@ -103,7 +103,7 @@ export class StingyVpnStack extends cdk.Stack {
         resources: [
           `arn:aws:ssm:${this.region}:${this.account}:parameter${parameterStorePrefix}/*`,
         ],
-      })
+      }),
     );
 
     // ========================================
@@ -141,7 +141,7 @@ export class StingyVpnStack extends cdk.Stack {
       "fi",
       "",
       "# Log startup completion",
-      'echo "WireGuard VPN server initialization complete"'
+      'echo "WireGuard VPN server initialization complete"',
     );
 
     this.launchTemplate = new ec2.LaunchTemplate(this, "LaunchTemplate", {
@@ -194,7 +194,7 @@ export class StingyVpnStack extends cdk.Stack {
         parameterStorePrefix,
         cloudflareZoneId,
         cloudflareRecordId,
-      }
+      },
     );
     this.ddnsUpdaterFunction = ddnsUpdaterLambda.function;
 
@@ -219,7 +219,7 @@ export class StingyVpnStack extends cdk.Stack {
     spotInterruptionRule.addTarget(
       new targets.LambdaFunction(this.recoveryFunction, {
         retryAttempts: 2,
-      })
+      }),
     );
 
     // EC2 Instance State Change Rule (for running state)
@@ -239,7 +239,7 @@ export class StingyVpnStack extends cdk.Stack {
     instanceRunningRule.addTarget(
       new targets.LambdaFunction(this.ddnsUpdaterFunction, {
         retryAttempts: 2,
-      })
+      }),
     );
 
     // ========================================

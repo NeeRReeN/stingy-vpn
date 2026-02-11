@@ -37,17 +37,18 @@ function loadConfig(): EnvConfig {
   const parameterStorePrefix = process.env.PARAMETER_STORE_PREFIX;
   const subnetId = process.env.SUBNET_ID;
   const launchTemplateId = process.env.LAUNCH_TEMPLATE_ID;
-  const validLogLevels: EnvConfig["logLevel"][] = ["debug", "info", "warn", "error"];
+  const validLogLevels: EnvConfig["logLevel"][] = [
+    "debug",
+    "info",
+    "warn",
+    "error",
+  ];
   const rawLogLevel = process.env.LOG_LEVEL ?? "info";
   const logLevel = validLogLevels.includes(rawLogLevel as EnvConfig["logLevel"])
     ? (rawLogLevel as EnvConfig["logLevel"])
     : "info";
 
-  if (
-    !parameterStorePrefix ||
-    !subnetId ||
-    !launchTemplateId
-  ) {
+  if (!parameterStorePrefix || !subnetId || !launchTemplateId) {
     throw new Error("Missing required environment variables");
   }
 
@@ -65,7 +66,7 @@ const config = loadConfig();
 function log(
   level: string,
   message: string,
-  data?: Record<string, unknown>
+  data?: Record<string, unknown>,
 ): void {
   const levels = ["debug", "info", "warn", "error"];
   const configLevelIndex = levels.indexOf(config.logLevel);
@@ -78,7 +79,7 @@ function log(
         message,
         ...data,
         timestamp: new Date().toISOString(),
-      })
+      }),
     );
   }
 }
@@ -157,7 +158,7 @@ async function launchNewSpotInstance(): Promise<string> {
 // Wait for instance to be running
 async function waitForInstanceRunning(
   instanceId: string,
-  maxAttempts = 30
+  maxAttempts = 30,
 ): Promise<void> {
   log("info", "Waiting for instance to be running", { instanceId });
 
@@ -186,14 +187,14 @@ async function waitForInstanceRunning(
   }
 
   throw new Error(
-    `Instance did not reach running state within ${maxAttempts * 10} seconds`
+    `Instance did not reach running state within ${maxAttempts * 10} seconds`,
   );
 }
 
 // Main handler
 export const handler = async (
   event: SpotInterruptionEvent,
-  context: Context
+  context: Context,
 ): Promise<void> => {
   log("info", "Spot interruption event received", {
     requestId: context.awsRequestId,
@@ -206,14 +207,18 @@ export const handler = async (
 
     // Get current instance ID from Parameter Store
     const currentInstanceId = await getParameter(
-      `${config.parameterStorePrefix}/instance-id`
+      `${config.parameterStorePrefix}/instance-id`,
     );
 
     // If the instance ID parameter is still in its initial state, ignore the event
     if (currentInstanceId === "initial") {
-      log("info", "Instance ID not initialized; ignoring spot interruption event", {
-        interruptedInstanceId,
-      });
+      log(
+        "info",
+        "Instance ID not initialized; ignoring spot interruption event",
+        {
+          interruptedInstanceId,
+        },
+      );
       return;
     }
 
@@ -232,7 +237,7 @@ export const handler = async (
     // Update instance ID in Parameter Store
     await putParameter(
       `${config.parameterStorePrefix}/instance-id`,
-      newInstanceId
+      newInstanceId,
     );
 
     // Wait for instance to be running (optional, but helps ensure DDNS update works)

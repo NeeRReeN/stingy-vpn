@@ -34,7 +34,7 @@ export class RecoveryLambdaConstruct extends Construct {
   constructor(
     scope: Construct,
     id: string,
-    props: RecoveryLambdaConstructProps
+    props: RecoveryLambdaConstructProps,
   ) {
     super(scope, id);
 
@@ -71,7 +71,7 @@ export class RecoveryLambdaConstruct extends Construct {
         resources: [
           `arn:aws:ssm:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:parameter${props.parameterStorePrefix}/*`,
         ],
-      })
+      }),
     );
 
     // Grant EC2 permissions for spot instance management
@@ -85,7 +85,7 @@ export class RecoveryLambdaConstruct extends Construct {
           "ec2:DescribeSpotInstanceRequests",
         ],
         resources: ["*"],
-      })
+      }),
     );
 
     // Grant EC2 launch template permissions
@@ -94,7 +94,7 @@ export class RecoveryLambdaConstruct extends Construct {
         effect: iam.Effect.ALLOW,
         actions: ["ec2:DescribeLaunchTemplates"],
         resources: ["*"],
-      })
+      }),
     );
 
     // Grant IAM pass role permission for EC2 instance profile
@@ -108,7 +108,7 @@ export class RecoveryLambdaConstruct extends Construct {
             "iam:PassedToService": "ec2.amazonaws.com",
           },
         },
-      })
+      }),
     );
 
     // Add tags

@@ -55,7 +55,7 @@ export class VpcConstruct extends Construct {
     this.securityGroup.addIngressRule(
       ec2.Peer.anyIpv4(),
       ec2.Port.udp(props.wireguardPort),
-      "Allow WireGuard UDP traffic"
+      "Allow WireGuard UDP traffic",
     );
 
     // Allow SSH access if enabled
@@ -63,7 +63,7 @@ export class VpcConstruct extends Construct {
       this.securityGroup.addIngressRule(
         ec2.Peer.anyIpv4(),
         ec2.Port.tcp(22),
-        "Allow SSH access"
+        "Allow SSH access",
       );
     }
 

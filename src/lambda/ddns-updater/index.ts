@@ -45,7 +45,12 @@ function loadConfig(): EnvConfig {
   const parameterStorePrefix = process.env.PARAMETER_STORE_PREFIX;
   const cloudflareZoneId = process.env.CLOUDFLARE_ZONE_ID;
   const cloudflareRecordId = process.env.CLOUDFLARE_RECORD_ID;
-  const validLogLevels: EnvConfig["logLevel"][] = ["debug", "info", "warn", "error"];
+  const validLogLevels: EnvConfig["logLevel"][] = [
+    "debug",
+    "info",
+    "warn",
+    "error",
+  ];
   const rawLogLevel = process.env.LOG_LEVEL ?? "info";
   const logLevel = validLogLevels.includes(rawLogLevel as EnvConfig["logLevel"])
     ? (rawLogLevel as EnvConfig["logLevel"])
@@ -69,7 +74,7 @@ const config = loadConfig();
 function log(
   level: string,
   message: string,
-  data?: Record<string, unknown>
+  data?: Record<string, unknown>,
 ): void {
   const levels = ["debug", "info", "warn", "error"];
   const configLevelIndex = levels.indexOf(config.logLevel);
@@ -82,7 +87,7 @@ function log(
         message,
         ...data,
         timestamp: new Date().toISOString(),
-      })
+      }),
     );
   }
 }
@@ -137,7 +142,7 @@ async function updateCloudflareRecord(ip: string): Promise<DnsRecord> {
 
   // Get Cloudflare API token from Parameter Store
   const apiToken = await getParameter(
-    `${config.parameterStorePrefix}/cloudflare-token`
+    `${config.parameterStorePrefix}/cloudflare-token`,
   );
 
   const url = `https://api.cloudflare.com/client/v4/zones/${config.cloudflareZoneId}/dns_records/${config.cloudflareRecordId}`;
@@ -176,7 +181,7 @@ async function updateCloudflareRecord(ip: string): Promise<DnsRecord> {
 async function withRetry<T>(
   operation: () => Promise<T>,
   maxAttempts = 3,
-  baseDelayMs = 1000
+  baseDelayMs = 1000,
 ): Promise<T> {
   let lastError: Error | undefined;
 
@@ -202,7 +207,7 @@ async function withRetry<T>(
 // Main handler
 export const handler = async (
   event: Ec2StateChangeEvent,
-  context: Context
+  context: Context,
 ): Promise<void> => {
   log("info", "EC2 state change event received", {
     requestId: context.awsRequestId,
@@ -221,7 +226,7 @@ export const handler = async (
 
     // Get current managed instance ID from Parameter Store
     const managedInstanceId = await getParameter(
-      `${config.parameterStorePrefix}/instance-id`
+      `${config.parameterStorePrefix}/instance-id`,
     );
 
     // Only update DNS for our managed instance
@@ -237,7 +242,7 @@ export const handler = async (
     const publicIp = await withRetry(
       () => getInstancePublicIp(instanceId),
       5, // More retries since IP assignment may take time
-      2000
+      2000,
     );
 
     // Update Cloudflare DNS record with retry

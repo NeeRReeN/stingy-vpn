@@ -28,7 +28,7 @@ export class DdnsUpdaterLambdaConstruct extends Construct {
   constructor(
     scope: Construct,
     id: string,
-    props: DdnsUpdaterLambdaConstructProps
+    props: DdnsUpdaterLambdaConstructProps,
   ) {
     super(scope, id);
 
@@ -63,7 +63,7 @@ export class DdnsUpdaterLambdaConstruct extends Construct {
         resources: [
           `arn:aws:ssm:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:parameter${props.parameterStorePrefix}/*`,
         ],
-      })
+      }),
     );
 
     // Grant EC2 describe permissions to get instance public IP
@@ -72,7 +72,7 @@ export class DdnsUpdaterLambdaConstruct extends Construct {
         effect: iam.Effect.ALLOW,
         actions: ["ec2:DescribeInstances"],
         resources: ["*"],
-      })
+      }),
     );
 
     // Add tags
