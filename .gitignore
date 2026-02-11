@@ -1,2 +1,8 @@
 .github/tmp/*
 **/node_modules
+dist/
+*.js
+*.d.ts
+!src/cdk/bin/*.js
+cdk.out/
+.cdk.staging/
