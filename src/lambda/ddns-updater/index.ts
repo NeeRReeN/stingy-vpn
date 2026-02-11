@@ -163,7 +163,7 @@ async function updateCloudflareRecord(ip: string): Promise<DnsRecord> {
     throw new Error(`Cloudflare API error: ${response.status} - ${errorBody}`);
   }
 
-  const data: CloudflareResponse<DnsRecord> = await response.json();
+  const data = (await response.json()) as CloudflareResponse<DnsRecord>;
 
   if (!data.success) {
     throw new Error(`Cloudflare API failed: ${JSON.stringify(data.errors)}`);
