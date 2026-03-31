@@ -12,12 +12,8 @@ export interface RecoveryLambdaConstructProps {
   readonly environment: Environment;
   /** Parameter Store prefix */
   readonly parameterStorePrefix: string;
-  /** VPC ID for EC2 operations */
-  readonly vpcId: string;
   /** Subnet ID for spot instance launch */
   readonly subnetId: string;
-  /** Security group ID for spot instance */
-  readonly securityGroupId: string;
   /** Launch template ID */
   readonly launchTemplateId: string;
   /** EC2 instance role ARN (for iam:PassRole restriction) */
@@ -50,9 +46,7 @@ export class RecoveryLambdaConstruct extends Construct {
       memorySize: 256,
       environment: {
         PARAMETER_STORE_PREFIX: props.parameterStorePrefix,
-        VPC_ID: props.vpcId,
         SUBNET_ID: props.subnetId,
-        SECURITY_GROUP_ID: props.securityGroupId,
         LAUNCH_TEMPLATE_ID: props.launchTemplateId,
         LOG_LEVEL: logLevel,
       },

@@ -177,9 +177,7 @@ export class StingyVpnStack extends cdk.Stack {
     const recoveryLambda = new RecoveryLambdaConstruct(this, "RecoveryLambda", {
       environment,
       parameterStorePrefix,
-      vpcId: this.vpc.vpcId,
       subnetId: vpcConstruct.subnet.subnetId,
-      securityGroupId: vpcConstruct.securityGroup.securityGroupId,
       launchTemplateId: this.launchTemplate.launchTemplateId!,
       ec2RoleArn: ec2Role.roleArn,
     });
