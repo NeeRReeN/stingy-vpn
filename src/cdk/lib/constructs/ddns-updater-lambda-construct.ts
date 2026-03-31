@@ -40,7 +40,7 @@ export class DdnsUpdaterLambdaConstruct extends Construct {
       handler: "handler",
       runtime: lambda.Runtime.NODEJS_20_X,
       architecture: lambda.Architecture.ARM_64,
-      timeout: cdk.Duration.seconds(30),
+      timeout: cdk.Duration.minutes(2),
       memorySize: 128,
       environment: {
         PARAMETER_STORE_PREFIX: props.parameterStorePrefix,

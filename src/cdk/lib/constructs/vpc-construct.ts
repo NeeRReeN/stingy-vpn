@@ -23,7 +23,7 @@ export class VpcConstruct extends Construct {
   constructor(scope: Construct, id: string, props: VpcConstructProps) {
     super(scope, id);
 
-    const enableSsh = props.enableSsh ?? true;
+    const enableSsh = props.enableSsh ?? false;
 
     // Create VPC with a single public subnet
     this.vpc = new ec2.Vpc(this, "Vpc", {

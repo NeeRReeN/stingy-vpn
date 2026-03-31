@@ -46,7 +46,7 @@ export class RecoveryLambdaConstruct extends Construct {
       handler: "handler",
       runtime: lambda.Runtime.NODEJS_20_X,
       architecture: lambda.Architecture.ARM_64,
-      timeout: cdk.Duration.minutes(5),
+      timeout: cdk.Duration.minutes(7),
       memorySize: 256,
       environment: {
         PARAMETER_STORE_PREFIX: props.parameterStorePrefix,
