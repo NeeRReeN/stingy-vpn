@@ -27,6 +27,8 @@ export interface StingyVpnStackProps extends cdk.StackProps {
   readonly cloudflareZoneId: string;
   /** Cloudflare DNS Record ID */
   readonly cloudflareRecordId: string;
+  /** CIDR to allow SSH from (only used in dev, e.g. "203.0.113.0/32") */
+  readonly sshAllowCidr?: string;
 }
 
 /**
@@ -52,6 +54,7 @@ export class StingyVpnStack extends cdk.Stack {
       wireguardPort = DEFAULT_CONFIG.wireguardPort,
       cloudflareZoneId,
       cloudflareRecordId,
+      sshAllowCidr,
     } = props;
 
     const parameterStorePrefix = `/stingy-vpn/${environment}`;
@@ -59,10 +62,12 @@ export class StingyVpnStack extends cdk.Stack {
     // ========================================
     // VPC and Network Resources
     // ========================================
+    const enableSsh = environment === "dev" && !!sshAllowCidr;
     const vpcConstruct = new VpcConstruct(this, "Vpc", {
       vpcCidr,
       wireguardPort,
-      enableSsh: environment === "dev",
+      enableSsh,
+      sshAllowCidr,
     });
 
     this.vpc = vpcConstruct.vpc;
@@ -124,8 +129,9 @@ export class StingyVpnStack extends cdk.Stack {
       'echo "net.ipv4.ip_forward = 1" >> /etc/sysctl.conf',
       "sysctl -p",
       "",
-      "# Get WireGuard configuration from Parameter Store",
-      `REGION=$(curl -s http://169.254.169.254/latest/meta-data/placement/region)`,
+      "# Get WireGuard configuration from Parameter Store (using IMDSv2)",
+      `IMDS_TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")`,
+      `REGION=$(curl -s -H "X-aws-ec2-metadata-token: $IMDS_TOKEN" http://169.254.169.254/latest/meta-data/placement/region)`,
       `WIREGUARD_CONFIG=$(aws ssm get-parameter --name "${parameterStorePrefix}/wireguard-config" --with-decryption --region $REGION --query 'Parameter.Value' --output text 2>/dev/null || echo "")`,
       "",
       "# Write WireGuard configuration",
@@ -145,7 +151,6 @@ export class StingyVpnStack extends cdk.Stack {
     );
 
     this.launchTemplate = new ec2.LaunchTemplate(this, "LaunchTemplate", {
-      launchTemplateName: `stingy-vpn-${environment}`,
       instanceType: spotInstanceType,
       machineImage: ec2.MachineImage.latestAmazonLinux2023({
         cpuType: ec2.AmazonLinuxCpuType.ARM_64,
@@ -158,6 +163,7 @@ export class StingyVpnStack extends cdk.Stack {
         requestType: ec2.SpotRequestType.ONE_TIME,
       },
       associatePublicIpAddress: true,
+      httpTokens: ec2.LaunchTemplateHttpTokens.REQUIRED,
     });
 
     // Store launch template ID in Parameter Store

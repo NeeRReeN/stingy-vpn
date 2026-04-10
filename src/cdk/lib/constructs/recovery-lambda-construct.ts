@@ -69,15 +69,44 @@ export class RecoveryLambdaConstruct extends Construct {
     );
 
     // Grant EC2 permissions for spot instance management
+    // Note: ec2:RunInstances needs broad resources because tags are applied at launch time,
+    // not on pre-existing resources. We scope ec2:CreateTags and Describe* where possible.
     this.function.addToRolePolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
-        actions: [
-          "ec2:RunInstances",
-          "ec2:CreateTags",
-          "ec2:DescribeInstances",
-          "ec2:DescribeSpotInstanceRequests",
+        actions: ["ec2:RunInstances"],
+        resources: [
+          `arn:aws:ec2:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:launch-template/*`,
+          `arn:aws:ec2:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:instance/*`,
+          `arn:aws:ec2:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:volume/*`,
+          `arn:aws:ec2:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:network-interface/*`,
+          `arn:aws:ec2:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:security-group/*`,
+          `arn:aws:ec2:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:subnet/*`,
+          `arn:aws:ec2:${cdk.Stack.of(this).region}::image/*`,
         ],
+      }),
+    );
+
+    this.function.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["ec2:CreateTags"],
+        resources: [
+          `arn:aws:ec2:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:instance/*`,
+          `arn:aws:ec2:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:volume/*`,
+        ],
+        conditions: {
+          StringEquals: {
+            "ec2:CreateAction": "RunInstances",
+          },
+        },
+      }),
+    );
+
+    this.function.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["ec2:DescribeInstances", "ec2:DescribeSpotInstanceRequests"],
         resources: ["*"],
       }),
     );

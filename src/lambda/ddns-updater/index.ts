@@ -156,6 +156,7 @@ async function updateCloudflareRecord(ip: string): Promise<DnsRecord> {
     body: JSON.stringify({
       content: ip,
     }),
+    signal: AbortSignal.timeout(10000),
   });
 
   if (!response.ok) {
@@ -183,6 +184,10 @@ async function withRetry<T>(
   maxAttempts = 3,
   baseDelayMs = 1000,
 ): Promise<T> {
+  if (maxAttempts < 1) {
+    throw new Error(`withRetry requires maxAttempts >= 1, got ${maxAttempts}`);
+  }
+
   let lastError: Error | undefined;
 
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {

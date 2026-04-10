@@ -9,6 +9,8 @@ export interface VpcConstructProps {
   readonly wireguardPort: number;
   /** Enable SSH access (TCP 22) */
   readonly enableSsh?: boolean;
+  /** CIDR to allow SSH from (required when enableSsh is true) */
+  readonly sshAllowCidr?: string;
 }
 
 /**
@@ -58,12 +60,17 @@ export class VpcConstruct extends Construct {
       "Allow WireGuard UDP traffic",
     );
 
-    // Allow SSH access if enabled
+    // Allow SSH access if enabled (requires explicit CIDR)
     if (enableSsh) {
+      if (!props.sshAllowCidr) {
+        throw new Error(
+          "sshAllowCidr is required when enableSsh is true",
+        );
+      }
       this.securityGroup.addIngressRule(
-        ec2.Peer.anyIpv4(),
+        ec2.Peer.ipv4(props.sshAllowCidr),
         ec2.Port.tcp(22),
-        "Allow SSH access",
+        `Allow SSH access from ${props.sshAllowCidr}`,
       );
     }
 

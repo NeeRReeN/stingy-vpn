@@ -109,7 +109,7 @@ async function putParameter(name: string, value: string): Promise<void> {
   });
 
   await ssmClient.send(command);
-  log("info", "Parameter updated", { name, value });
+  log("info", "Parameter updated", { name });
 }
 
 // Launch a new spot instance
