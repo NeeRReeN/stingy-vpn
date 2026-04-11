@@ -56,14 +56,21 @@ function loadConfig(): EnvConfig {
     ? (rawLogLevel as EnvConfig["logLevel"])
     : "info";
 
-  if (!parameterStorePrefix || !cloudflareZoneId || !cloudflareRecordId) {
-    throw new Error("Missing required environment variables");
+  const missing = [
+    ...(!parameterStorePrefix ? ["PARAMETER_STORE_PREFIX"] : []),
+    ...(!cloudflareZoneId ? ["CLOUDFLARE_ZONE_ID"] : []),
+    ...(!cloudflareRecordId ? ["CLOUDFLARE_RECORD_ID"] : []),
+  ];
+  if (missing.length > 0) {
+    throw new Error(
+      `Missing required environment variables: ${missing.join(", ")}`,
+    );
   }
 
   return {
-    parameterStorePrefix,
-    cloudflareZoneId,
-    cloudflareRecordId,
+    parameterStorePrefix: parameterStorePrefix!,
+    cloudflareZoneId: cloudflareZoneId!,
+    cloudflareRecordId: cloudflareRecordId!,
     logLevel,
   };
 }

@@ -48,14 +48,21 @@ function loadConfig(): EnvConfig {
     ? (rawLogLevel as EnvConfig["logLevel"])
     : "info";
 
-  if (!parameterStorePrefix || !subnetId || !launchTemplateId) {
-    throw new Error("Missing required environment variables");
+  const missing = [
+    ...(!parameterStorePrefix ? ["PARAMETER_STORE_PREFIX"] : []),
+    ...(!subnetId ? ["SUBNET_ID"] : []),
+    ...(!launchTemplateId ? ["LAUNCH_TEMPLATE_ID"] : []),
+  ];
+  if (missing.length > 0) {
+    throw new Error(
+      `Missing required environment variables: ${missing.join(", ")}`,
+    );
   }
 
   return {
-    parameterStorePrefix,
-    subnetId,
-    launchTemplateId,
+    parameterStorePrefix: parameterStorePrefix!,
+    subnetId: subnetId!,
+    launchTemplateId: launchTemplateId!,
     logLevel,
   };
 }
