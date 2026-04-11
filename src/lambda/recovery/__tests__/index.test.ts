@@ -6,14 +6,14 @@ const mockSsmSend = vi.fn();
 
 vi.mock("@aws-sdk/client-ec2", () => ({
   EC2Client: vi.fn(() => ({ send: mockEc2Send })),
-  RunInstancesCommand: vi.fn((input: unknown) => ({ input, _type: "RunInstances" })),
-  DescribeInstancesCommand: vi.fn((input: unknown) => ({ input, _type: "DescribeInstances" })),
+  RunInstancesCommand: vi.fn((input: unknown) => ({ input })),
+  DescribeInstancesCommand: vi.fn((input: unknown) => ({ input })),
 }));
 
 vi.mock("@aws-sdk/client-ssm", () => ({
   SSMClient: vi.fn(() => ({ send: mockSsmSend })),
-  GetParameterCommand: vi.fn((input: unknown) => ({ input, _type: "GetParameter" })),
-  PutParameterCommand: vi.fn((input: unknown) => ({ input, _type: "PutParameter" })),
+  GetParameterCommand: vi.fn((input: unknown) => ({ input })),
+  PutParameterCommand: vi.fn((input: unknown) => ({ input })),
 }));
 
 // Set env vars before module load

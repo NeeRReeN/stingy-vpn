@@ -6,12 +6,12 @@ const mockSsmSend = vi.fn();
 
 vi.mock("@aws-sdk/client-ec2", () => ({
   EC2Client: vi.fn(() => ({ send: mockEc2Send })),
-  DescribeInstancesCommand: vi.fn((input: unknown) => ({ input, _type: "DescribeInstances" })),
+  DescribeInstancesCommand: vi.fn((input: unknown) => ({ input })),
 }));
 
 vi.mock("@aws-sdk/client-ssm", () => ({
   SSMClient: vi.fn(() => ({ send: mockSsmSend })),
-  GetParameterCommand: vi.fn((input: unknown) => ({ input, _type: "GetParameter" })),
+  GetParameterCommand: vi.fn((input: unknown) => ({ input })),
 }));
 
 // Mock global fetch
