@@ -35,6 +35,8 @@ export class RecoveryLambdaConstruct extends Construct {
     super(scope, id);
 
     const logLevel = props.environment === "prod" ? "info" : "debug";
+    const instanceIdParameterName = `${props.parameterStorePrefix}/instance-id`;
+    const instanceIdParameterArn = `arn:aws:ssm:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:parameter${instanceIdParameterName}`;
 
     // Create Lambda function
     this.function = new lambdaNodejs.NodejsFunction(this, "Function", {
@@ -62,9 +64,7 @@ export class RecoveryLambdaConstruct extends Construct {
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: ["ssm:GetParameter", "ssm:GetParameters", "ssm:PutParameter"],
-        resources: [
-          `arn:aws:ssm:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:parameter${props.parameterStorePrefix}/*`,
-        ],
+        resources: [instanceIdParameterArn],
       }),
     );
 
