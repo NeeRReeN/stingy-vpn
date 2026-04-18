@@ -139,6 +139,30 @@ async function getInstancePublicIp(instanceId: string): Promise<string> {
   return publicIp;
 }
 
+const CLOUDFLARE_TOKEN_TTL_MS = 5 * 60 * 1000;
+let cachedCloudflareApiToken: string | undefined;
+let cachedCloudflareApiTokenExpiresAt = 0;
+
+async function getCloudflareApiToken(): Promise<string> {
+  const now = Date.now();
+
+  if (
+    cachedCloudflareApiToken &&
+    now < cachedCloudflareApiTokenExpiresAt
+  ) {
+    return cachedCloudflareApiToken;
+  }
+
+  const apiToken = await getParameter(
+    `${config.parameterStorePrefix}/cloudflare-token`,
+  );
+
+  cachedCloudflareApiToken = apiToken;
+  cachedCloudflareApiTokenExpiresAt = now + CLOUDFLARE_TOKEN_TTL_MS;
+
+  return apiToken;
+}
+
 // Update Cloudflare DNS record
 async function updateCloudflareRecord(ip: string): Promise<DnsRecord> {
   log("info", "Updating Cloudflare DNS record", {
@@ -147,10 +171,7 @@ async function updateCloudflareRecord(ip: string): Promise<DnsRecord> {
     ip,
   });
 
-  // Get Cloudflare API token from Parameter Store
-  const apiToken = await getParameter(
-    `${config.parameterStorePrefix}/cloudflare-token`,
-  );
+  const apiToken = await getCloudflareApiToken();
 
   const url = `https://api.cloudflare.com/client/v4/zones/${config.cloudflareZoneId}/dns_records/${config.cloudflareRecordId}`;
 
