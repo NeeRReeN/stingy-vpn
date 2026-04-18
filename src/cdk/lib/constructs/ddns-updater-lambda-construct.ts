@@ -56,12 +56,17 @@ export class DdnsUpdaterLambdaConstruct extends Construct {
     });
 
     // Grant Parameter Store permissions
+    const stack = cdk.Stack.of(this);
+    const instanceIdParameterArn = `arn:aws:ssm:${stack.region}:${stack.account}:parameter${props.parameterStorePrefix}/instance-id`;
+    const cloudflareTokenParameterArn = `arn:aws:ssm:${stack.region}:${stack.account}:parameter${props.parameterStorePrefix}/cloudflare-token`;
+
     this.function.addToRolePolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: ["ssm:GetParameter", "ssm:GetParameters"],
         resources: [
-          `arn:aws:ssm:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:parameter${props.parameterStorePrefix}/*`,
+          instanceIdParameterArn,
+          cloudflareTokenParameterArn,
         ],
       }),
     );
