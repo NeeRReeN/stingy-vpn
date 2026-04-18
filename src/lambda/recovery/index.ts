@@ -8,6 +8,7 @@ import {
   SSMClient,
   GetParameterCommand,
   PutParameterCommand,
+  DeleteParameterCommand,
 } from "@aws-sdk/client-ssm";
 
 // Type definitions
@@ -209,9 +210,11 @@ export const handler = async (
     action: event.detail["instance-action"],
   });
 
-  try {
-    const interruptedInstanceId = event.detail["instance-id"];
+  const interruptedInstanceId = event.detail["instance-id"];
+  const recoveryLockParameterName = `${config.parameterStorePrefix}/recovery-locks/${interruptedInstanceId}`;
+  let recoveryLockAcquired = false;
 
+  try {
     // Get current instance ID from Parameter Store
     const currentInstanceId = await getParameter(
       `${config.parameterStorePrefix}/instance-id`,
@@ -238,6 +241,37 @@ export const handler = async (
       return;
     }
 
+    // Acquire an idempotency lock so duplicate or concurrent deliveries
+    // for the same interrupted instance do not launch multiple replacements.
+    try {
+      await ssmClient.send(
+        new PutParameterCommand({
+          Name: recoveryLockParameterName,
+          Value: JSON.stringify({
+            requestId: context.awsRequestId,
+            acquiredAt: new Date().toISOString(),
+          }),
+          Type: "String",
+          Overwrite: false,
+        }),
+      );
+      recoveryLockAcquired = true;
+    } catch (error) {
+      if (error instanceof Error && error.name === "ParameterAlreadyExists") {
+        log(
+          "info",
+          "Recovery already in progress or already completed for interrupted instance",
+          {
+            interruptedInstanceId,
+            recoveryLockParameterName,
+          },
+        );
+        return;
+      }
+
+      throw error;
+    }
+
     // Launch a new spot instance
     const newInstanceId = await launchNewSpotInstance();
 
@@ -255,6 +289,25 @@ export const handler = async (
       newInstanceId,
     });
   } catch (error) {
+    if (recoveryLockAcquired) {
+      try {
+        await ssmClient.send(
+          new DeleteParameterCommand({
+            Name: recoveryLockParameterName,
+          }),
+        );
+      } catch (cleanupError) {
+        log("warn", "Failed to clean up recovery lock after error", {
+          interruptedInstanceId,
+          recoveryLockParameterName,
+          error:
+            cleanupError instanceof Error
+              ? cleanupError.message
+              : String(cleanupError),
+        });
+      }
+    }
+
     log("error", "Recovery failed", {
       error: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
