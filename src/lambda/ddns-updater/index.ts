@@ -92,8 +92,8 @@ function log(
       JSON.stringify({
         level,
         message,
-        ...data,
         timestamp: new Date().toISOString(),
+        ...(data ? { data } : {}),
       }),
     );
   }
