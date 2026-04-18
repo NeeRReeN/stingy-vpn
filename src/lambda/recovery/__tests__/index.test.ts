@@ -14,6 +14,7 @@ vi.mock("@aws-sdk/client-ssm", () => ({
   SSMClient: vi.fn(() => ({ send: mockSsmSend })),
   GetParameterCommand: vi.fn((input: unknown) => ({ input })),
   PutParameterCommand: vi.fn((input: unknown) => ({ input })),
+  DeleteParameterCommand: vi.fn((input: unknown) => ({ input })),
 }));
 
 // Set env vars before module load
