@@ -1,12 +1,7 @@
 import type { EventBridgeEvent, Context } from "aws-lambda";
 import { EC2Client, DescribeInstancesCommand } from "@aws-sdk/client-ec2";
 import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm";
-
-// Type definitions
-interface Ec2StateChangeDetail {
-  "instance-id": string;
-  state: string;
-}
+import type { Ec2StateChangeDetail } from "../../config/types.js";
 
 type Ec2StateChangeEvent = EventBridgeEvent<
   "EC2 Instance State-change Notification",

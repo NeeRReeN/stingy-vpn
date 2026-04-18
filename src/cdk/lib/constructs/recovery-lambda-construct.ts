@@ -59,29 +59,32 @@ export class RecoveryLambdaConstruct extends Construct {
       logRetention: logs.RetentionDays.TWO_WEEKS,
     });
 
-    // Grant Parameter Store permissions
+    // Grant Parameter Store permissions (instance-id + recovery-locks)
+    const recoveryLocksParameterArn = `arn:aws:ssm:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:parameter${props.parameterStorePrefix}/recovery-locks/*`;
+
     this.function.addToRolePolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
-        actions: ["ssm:GetParameter", "ssm:GetParameters", "ssm:PutParameter"],
-        resources: [instanceIdParameterArn],
+        actions: ["ssm:GetParameter", "ssm:GetParameters", "ssm:PutParameter", "ssm:DeleteParameter"],
+        resources: [instanceIdParameterArn, recoveryLocksParameterArn],
       }),
     );
 
     // Grant EC2 permissions for spot instance management
-    // Note: ec2:RunInstances needs broad resources because tags are applied at launch time,
-    // not on pre-existing resources. We scope ec2:CreateTags and Describe* where possible.
+    // Scope launch template and subnet to specific ARNs; instance, volume,
+    // network-interface, security-group, and image must remain wildcards
+    // because they are created/referenced at launch time.
     this.function.addToRolePolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: ["ec2:RunInstances"],
         resources: [
-          `arn:aws:ec2:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:launch-template/*`,
+          `arn:aws:ec2:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:launch-template/${props.launchTemplateId}`,
+          `arn:aws:ec2:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:subnet/${props.subnetId}`,
           `arn:aws:ec2:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:instance/*`,
           `arn:aws:ec2:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:volume/*`,
           `arn:aws:ec2:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:network-interface/*`,
           `arn:aws:ec2:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:security-group/*`,
-          `arn:aws:ec2:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:subnet/*`,
           `arn:aws:ec2:${cdk.Stack.of(this).region}::image/*`,
         ],
       }),

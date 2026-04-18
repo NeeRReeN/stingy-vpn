@@ -108,7 +108,9 @@ describe("Recovery Lambda Handler", () => {
     mockSsmSend.mockResolvedValueOnce({
       Parameter: { Value: managedInstanceId },
     });
-    // PutParameter succeeds
+    // PutParameter for recovery lock (Overwrite:false) succeeds
+    mockSsmSend.mockResolvedValueOnce({});
+    // PutParameter to update instance-id succeeds
     mockSsmSend.mockResolvedValueOnce({});
 
     // RunInstances returns new instance
@@ -125,18 +127,25 @@ describe("Recovery Lambda Handler", () => {
     const handler = await importHandler();
     await handler(createEvent(managedInstanceId), mockContext);
 
-    // Should call SSM twice (get + put) and EC2 twice (run + describe)
-    expect(mockSsmSend).toHaveBeenCalledTimes(2);
+    // SSM: get instance-id + put recovery lock + put instance-id
+    expect(mockSsmSend).toHaveBeenCalledTimes(3);
+    // EC2: RunInstances + DescribeInstances
     expect(mockEc2Send).toHaveBeenCalledTimes(2);
   });
 
   it("should throw when RunInstances fails", async () => {
     const managedInstanceId = "i-managed-instance";
 
+    // GetParameter returns managed instance ID
     mockSsmSend.mockResolvedValueOnce({
       Parameter: { Value: managedInstanceId },
     });
+    // PutParameter for recovery lock succeeds
+    mockSsmSend.mockResolvedValueOnce({});
+    // EC2 RunInstances fails
     mockEc2Send.mockRejectedValueOnce(new Error("EC2 API error"));
+    // DeleteParameter for lock cleanup on error
+    mockSsmSend.mockResolvedValueOnce({});
 
     const handler = await importHandler();
     await expect(
@@ -148,19 +157,27 @@ describe("Recovery Lambda Handler", () => {
     const managedInstanceId = "i-managed-instance";
     const newInstanceId = "i-new-instance";
 
+    // GetParameter returns managed instance ID
     mockSsmSend.mockResolvedValueOnce({
       Parameter: { Value: managedInstanceId },
     });
+    // PutParameter for recovery lock succeeds
+    mockSsmSend.mockResolvedValueOnce({});
+    // PutParameter to update instance-id succeeds
     mockSsmSend.mockResolvedValueOnce({});
 
+    // RunInstances returns new instance
     mockEc2Send.mockResolvedValueOnce({
       Instances: [{ InstanceId: newInstanceId }],
     });
+    // DescribeInstances returns terminated state
     mockEc2Send.mockResolvedValueOnce({
       Reservations: [
         { Instances: [{ State: { Name: "terminated" } }] },
       ],
     });
+    // DeleteParameter for lock cleanup on error
+    mockSsmSend.mockResolvedValueOnce({});
 
     const handler = await importHandler();
     await expect(
