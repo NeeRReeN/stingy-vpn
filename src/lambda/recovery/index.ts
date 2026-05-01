@@ -10,7 +10,11 @@ import {
   PutParameterCommand,
   DeleteParameterCommand,
 } from "@aws-sdk/client-ssm";
-import type { SpotInterruptionDetail } from "../../config/types.js";
+
+interface SpotInterruptionDetail {
+  readonly "instance-id": string;
+  readonly "instance-action": string;
+}
 
 type SpotInterruptionEvent = EventBridgeEvent<
   "EC2 Spot Instance Interruption Warning",

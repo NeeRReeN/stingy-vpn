@@ -5,7 +5,7 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as logs from "aws-cdk-lib/aws-logs";
 import { Construct } from "constructs";
 
-import type { Environment } from "../../../config/types.js";
+import type { Environment } from "../../types.js";
 
 export interface DdnsUpdaterLambdaConstructProps {
   /** Environment (dev/prod) */
@@ -64,10 +64,7 @@ export class DdnsUpdaterLambdaConstruct extends Construct {
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: ["ssm:GetParameter", "ssm:GetParameters"],
-        resources: [
-          instanceIdParameterArn,
-          cloudflareTokenParameterArn,
-        ],
+        resources: [instanceIdParameterArn, cloudflareTokenParameterArn],
       }),
     );
 
