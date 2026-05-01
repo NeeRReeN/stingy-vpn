@@ -49,10 +49,8 @@ stingy-vpn/
 ├── src/
 │   ├── cdk/                    # AWS CDK stacks
 │   │   └── AGENTS.md           # → CDK development guide
-│   ├── lambda/                 # Lambda functions
-│   │   └── AGENTS.md           # → Lambda development guide
-│   └── config/                 # Configuration
-│       └── AGENTS.md           # → Type definitions and config guide
+│   └── lambda/                 # Lambda functions
+│       └── AGENTS.md           # → Lambda development guide
 └── wireguard/                  # WireGuard configuration
     └── AGENTS.md               # → WireGuard setup guide
 ```
@@ -61,7 +59,6 @@ stingy-vpn/
 
 - [src/cdk/AGENTS.md](src/cdk/AGENTS.md) - AWS infrastructure definitions
 - [src/lambda/AGENTS.md](src/lambda/AGENTS.md) - Lambda function implementation
-- [src/config/AGENTS.md](src/config/AGENTS.md) - Type definitions and configuration
 - [wireguard/AGENTS.md](wireguard/AGENTS.md) - VPN configuration
 
 ---

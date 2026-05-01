@@ -6,8 +6,12 @@ import * as events from "aws-cdk-lib/aws-events";
 import * as targets from "aws-cdk-lib/aws-events-targets";
 import { Construct } from "constructs";
 
-import type { Environment } from "../../config/types.js";
-import { DEFAULT_CONFIG } from "../../config/types.js";
+import type { Environment } from "../types.js";
+
+const DEFAULT_CONFIG = {
+  wireguardPort: 51820,
+  vpcCidr: "10.0.0.0/16",
+} as const;
 import {
   VpcConstruct,
   RecoveryLambdaConstruct,

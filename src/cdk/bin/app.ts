@@ -2,14 +2,15 @@
 
 import * as cdk from "aws-cdk-lib";
 
+import type { Environment } from "../types.js";
+
 import { StingyVpnStack } from "../lib/stingy-vpn-stack.js";
 
 const app = new cdk.App();
 
 // Get configuration from context or environment
-const environment = (app.node.tryGetContext("environment") ?? "dev") as
-  | "dev"
-  | "prod";
+const environment = (app.node.tryGetContext("environment") ??
+  "dev") as Environment;
 const cloudflareZoneId =
   app.node.tryGetContext("cloudflareZoneId") ??
   process.env.CLOUDFLARE_ZONE_ID ??
@@ -27,7 +28,7 @@ const sshAllowCidr =
 if (!cloudflareZoneId || !cloudflareRecordId) {
   console.warn(
     "Warning: Cloudflare configuration not provided. " +
-      "Set cloudflareZoneId and cloudflareRecordId via context or environment variables."
+      "Set cloudflareZoneId and cloudflareRecordId via context or environment variables.",
   );
 }
 

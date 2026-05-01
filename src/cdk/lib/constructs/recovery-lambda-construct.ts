@@ -5,7 +5,7 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as logs from "aws-cdk-lib/aws-logs";
 import { Construct } from "constructs";
 
-import type { Environment } from "../../../config/types.js";
+import type { Environment } from "../../types.js";
 
 export interface RecoveryLambdaConstructProps {
   /** Environment (dev/prod) */
@@ -65,7 +65,12 @@ export class RecoveryLambdaConstruct extends Construct {
     this.function.addToRolePolicy(
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
-        actions: ["ssm:GetParameter", "ssm:GetParameters", "ssm:PutParameter", "ssm:DeleteParameter"],
+        actions: [
+          "ssm:GetParameter",
+          "ssm:GetParameters",
+          "ssm:PutParameter",
+          "ssm:DeleteParameter",
+        ],
         resources: [instanceIdParameterArn, recoveryLocksParameterArn],
       }),
     );

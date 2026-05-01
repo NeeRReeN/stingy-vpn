@@ -1,7 +1,11 @@
 import type { EventBridgeEvent, Context } from "aws-lambda";
 import { EC2Client, DescribeInstancesCommand } from "@aws-sdk/client-ec2";
 import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm";
-import type { Ec2StateChangeDetail } from "../../config/types.js";
+
+interface Ec2StateChangeDetail {
+  readonly "instance-id": string;
+  readonly state: string;
+}
 
 type Ec2StateChangeEvent = EventBridgeEvent<
   "EC2 Instance State-change Notification",
@@ -141,10 +145,7 @@ let cachedCloudflareApiTokenExpiresAt = 0;
 async function getCloudflareApiToken(): Promise<string> {
   const now = Date.now();
 
-  if (
-    cachedCloudflareApiToken &&
-    now < cachedCloudflareApiTokenExpiresAt
-  ) {
+  if (cachedCloudflareApiToken && now < cachedCloudflareApiTokenExpiresAt) {
     return cachedCloudflareApiToken;
   }
 
