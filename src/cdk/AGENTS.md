@@ -19,22 +19,6 @@ CDK stacks that define the AWS infrastructure for stingy-vpn.
 | EventBridge           | Spot interruption event detection           |
 | IAM Roles             | Lambda execution permissions                |
 
-## CDK Commands
-
-```bash
-# Check CDK stack diff
-npx cdk diff
-
-# CDK deploy
-npx cdk deploy
-
-# CDK stack destroy
-npx cdk destroy
-
-# Generate CloudFormation template
-npx cdk synth
-```
-
 ## Spot Instance Recovery Flow
 
 1. EventBridge detects spot interruption event

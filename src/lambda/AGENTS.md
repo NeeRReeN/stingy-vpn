@@ -74,15 +74,7 @@ PATCH https://api.cloudflare.com/client/v4/zones/{zone_id}/dns_records/{record_i
 - Record ID: ID of existing A record
 - API Token: Token with DNS edit permissions (stored in Parameter Store as `SecureString`)
 
-## Testing
-
-```bash
-# Run tests for specific Lambda function
-npm test -- --testPathPattern=recovery
-npm test -- --testPathPattern=ddns-updater
-```
-
-### Testing Conventions
+## Testing Conventions
 
 - Place test files in `__tests__/` directory
 - File names should be `*.test.ts` or `*.spec.ts`
