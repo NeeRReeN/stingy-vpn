@@ -6,6 +6,22 @@ This directory contains AWS CDK stack definitions.
 
 CDK stacks that define the AWS infrastructure for stingy-vpn.
 
+## Directory Structure
+
+```
+src/cdk/
+├── bin/
+│   └── app.ts                          # CDK application entry point
+├── lib/
+│   ├── stingy-vpn-stack.ts             # Main stack
+│   └── constructs/
+│       ├── index.ts                    # Re-exports all constructs
+│       ├── vpc-construct.ts            # VPC and security groups
+│       ├── recovery-lambda-construct.ts    # Spot interruption recovery Lambda
+│       └── ddns-updater-lambda-construct.ts # Cloudflare DDNS updater Lambda
+└── types.ts                            # Shared types (Environment)
+```
+
 ## Key Resources
 
 ### Deployed Resources
