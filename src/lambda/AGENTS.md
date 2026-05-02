@@ -72,7 +72,7 @@ PATCH https://api.cloudflare.com/client/v4/zones/{zone_id}/dns_records/{record_i
 
 - Zone ID: Obtain from Cloudflare dashboard
 - Record ID: ID of existing A record
-- API Token: Token with DNS edit permissions
+- API Token: Token with DNS edit permissions (stored in Parameter Store as `SecureString`)
 
 ## Testing
 
@@ -88,25 +88,3 @@ npm test -- --testPathPattern=ddns-updater
 - File names should be `*.test.ts` or `*.spec.ts`
 - Properly set up environment variable mocks
 - Mock AWS SDK calls
-
-## Error Handling
-
-```typescript
-try {
-  const result = await someAsyncOperation();
-  return result;
-} catch (error) {
-  console.error("Operation failed", { error, context: "functionName" });
-  throw new Error(
-    `Failed: ${error instanceof Error ? error.message : "Unknown error"}`
-  );
-}
-```
-
-## Best Practices
-
-- Keep Lambda functions stateless
-- Set timeout values considering processing time + buffer
-- Implement retry logic (ensure idempotency)
-- Use structured logs (JSON format)
-- Optimize memory usage (cost reduction)

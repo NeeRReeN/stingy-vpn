@@ -46,14 +46,5 @@ npx cdk synth
 
 ## Coding Conventions
 
-- Design CDK Constructs to be reusable
-- Can be separated into `constructs/` directory
-- Prefix resource names with project name
-- Set appropriate tags (for cost management and resource identification)
-
-## Best Practices
-
-- Always implement spot instance interruption handling
-- Follow the principle of least privilege for IAM policies
-- Use SecureString type for sensitive values in Parameter Store
-- Enable detailed CloudWatch logging for troubleshooting
+- Design CDK Constructs to be reusable; place each Construct in the `constructs/` directory under a dedicated file
+- Props interfaces use `readonly` properties throughout
