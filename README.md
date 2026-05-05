@@ -21,7 +21,7 @@ The following tools must be installed on your local machine before getting start
 
 ### Step 1: Generate WireGuard key pairs
 
-Generate two key pairs on your local machine — one for the server, one for each client device.
+Generate a key pair on your local machine for the server and for each client device.
 
 ```bash
 # Restrict permissions on files created in this shell session (prevents world-readable key files)
@@ -30,8 +30,11 @@ umask 077
 # Server key pair
 wg genkey | tee server_private.key | wg pubkey > server_public.key
 
-# Client key pair (repeat for each device)
-wg genkey | tee client_private.key | wg pubkey > client_public.key
+# Home device key pair
+wg genkey | tee home_private.key | wg pubkey > home_public.key
+
+# Mobile device key pair
+wg genkey | tee mobile_private.key | wg pubkey > mobile_public.key
 ```
 
 > [!WARNING]
@@ -47,11 +50,11 @@ cp wireguard/server/wg0.conf /tmp/wg0.conf
 
 Edit `/tmp/wg0.conf` — replace placeholders with actual values:
 
-| Placeholder                  | Replace with                                    |
-| ---------------------------- | ----------------------------------------------- |
-| `<SERVER_PRIVATE_KEY>`       | Contents of `server_private.key`                |
-| `<HOME_DEVICE_PUBLIC_KEY>`   | Contents of `client_public.key` (home device)   |
-| `<MOBILE_DEVICE_PUBLIC_KEY>` | Contents of `client_public.key` (mobile device) |
+| Placeholder                  | Replace with                       |
+| ---------------------------- | ---------------------------------- |
+| `<SERVER_PRIVATE_KEY>`       | Contents of `server_private.key`   |
+| `<HOME_DEVICE_PUBLIC_KEY>`   | Contents of `home_public.key`      |
+| `<MOBILE_DEVICE_PUBLIC_KEY>` | Contents of `mobile_public.key`    |
 
 See [wireguard/AGENTS.md](wireguard/AGENTS.md) for a description of each field.
 
@@ -114,11 +117,11 @@ cp wireguard/client/mobile.example.conf wireguard/client/mobile.conf
 
 Edit the copied file — replace placeholders with actual values:
 
-| Placeholder               | Replace with                     |
-| ------------------------- | -------------------------------- |
-| `<YOUR_PRIVATE_KEY>`      | Contents of `client_private.key` |
-| `<SERVER_PUBLIC_KEY>`     | Contents of `server_public.key`  |
-| `your-domain.example.com` | Your Cloudflare DDNS domain      |
+| Placeholder               | Replace with                                                    |
+| ------------------------- | --------------------------------------------------------------- |
+| `<YOUR_PRIVATE_KEY>`      | Contents of `home_private.key` or `mobile_private.key`          |
+| `<SERVER_PUBLIC_KEY>`     | Contents of `server_public.key`                                 |
+| `your-domain.example.com` | Your Cloudflare DDNS domain                                     |
 
 Install the configuration on the client device:
 
