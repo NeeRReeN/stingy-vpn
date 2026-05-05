@@ -45,8 +45,6 @@ stingy-vpn/
 ├── .github/
 │   ├── copilot-instructions.md # Concise instructions for GitHub Copilot
 │   └── instructions/           # Development best practices
-│       ├── aws-cdk.instructions.md
-│       ├── lambda.instructions.md
 │       └── typescript.instructions.md
 ├── src/
 │   ├── cdk/                    # AWS CDK stacks
