@@ -56,9 +56,10 @@ src/
 
 **Environment Variables**:
 
-- `CLOUDFLARE_API_TOKEN`: Cloudflare API token (retrieved from Parameter Store)
+- `PARAMETER_STORE_PREFIX`: Parameter Store prefix (e.g., `/stingy-vpn/dev`)
 - `CLOUDFLARE_ZONE_ID`: Cloudflare Zone ID
 - `CLOUDFLARE_RECORD_ID`: DNS record ID to update
+- `LOG_LEVEL`: Log verbosity (optional, default: `info`)
 
 ## Cloudflare API
 
@@ -72,7 +73,7 @@ PATCH https://api.cloudflare.com/client/v4/zones/{zone_id}/dns_records/{record_i
 
 - Zone ID: Obtain from Cloudflare dashboard
 - Record ID: ID of existing A record
-- API Token: Token with DNS edit permissions (stored in Parameter Store as `SecureString`)
+- API Token: Token with DNS edit permissions; stored in Parameter Store at `${PARAMETER_STORE_PREFIX}/cloudflare-token` as a `SecureString` and fetched at runtime (not passed as an environment variable)
 
 ## Testing Conventions
 
