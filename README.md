@@ -88,7 +88,10 @@ npm install
 # First time only
 npx cdk bootstrap
 
-npx cdk deploy
+npx cdk deploy \
+  -c environment=prod \
+  -c cloudflareZoneId=<YOUR_CLOUDFLARE_ZONE_ID> \
+  -c cloudflareRecordId=<YOUR_CLOUDFLARE_RECORD_ID>
 ```
 
 ### Step 6: Set up the client device configuration file
