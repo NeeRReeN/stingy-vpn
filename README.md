@@ -57,9 +57,12 @@ See [wireguard/AGENTS.md](wireguard/AGENTS.md) for a description of each field.
 
 ### Step 3: Upload the server configuration to Parameter Store
 
+> [!NOTE]
+> Replace `<environment>` with the same value you will pass to `-c environment=` in Step 5 (e.g. `dev` or `prod`). The CDK stack reads from `/stingy-vpn/<environment>/wireguard-config`.
+
 ```bash
 aws ssm put-parameter \
-  --name "/stingy-vpn/prod/wireguard-config" \
+  --name "/stingy-vpn/<environment>/wireguard-config" \
   --value "$(cat /tmp/wg0.conf)" \
   --type SecureString \
   --region <YOUR_REGION>
@@ -72,9 +75,12 @@ aws ssm put-parameter \
 
 Create a Cloudflare API token with **DNS Edit** permission for your zone, then upload it:
 
+> [!NOTE]
+> Use the same `<environment>` value as in Step 3. The CDK stack reads from `/stingy-vpn/<environment>/cloudflare-token`.
+
 ```bash
 aws ssm put-parameter \
-  --name "/stingy-vpn/prod/cloudflare-token" \
+  --name "/stingy-vpn/<environment>/cloudflare-token" \
   --value "<YOUR_CLOUDFLARE_API_TOKEN>" \
   --type SecureString \
   --region <YOUR_REGION>
@@ -89,7 +95,7 @@ npm install
 npx cdk bootstrap
 
 npx cdk deploy \
-  -c environment=prod \
+  -c environment=<environment> \
   -c cloudflareZoneId=<YOUR_CLOUDFLARE_ZONE_ID> \
   -c cloudflareRecordId=<YOUR_CLOUDFLARE_RECORD_ID>
 ```
@@ -136,7 +142,7 @@ wg-quick up wg0
 3. Re-upload `wireguard-config` to Parameter Store (use `--overwrite`):
    ```bash
    aws ssm put-parameter \
-     --name "/stingy-vpn/prod/wireguard-config" \
+     --name "/stingy-vpn/<environment>/wireguard-config" \
      --value "$(cat /tmp/wg0.conf)" \
      --type SecureString \
      --overwrite \
