@@ -25,9 +25,13 @@ Address = 10.0.0.5/24        # Server's IP in the VPN network (fixed)
 ListenPort = 51820            # WireGuard default port
 PrivateKey = <SERVER_PRIVATE_KEY>  # Replaced with actual key before upload to Parameter Store
 
-[Peer]                        # One block per client device
-PublicKey = <CLIENT_PUBLIC_KEY>
-AllowedIPs = 10.0.0.X/32     # Unique IP per client (10.0.0.6, 10.0.0.7, ...)
+[Peer]                        # Home device
+PublicKey = <HOME_DEVICE_PUBLIC_KEY>
+AllowedIPs = 10.0.0.6/32
+
+[Peer]                        # Mobile device
+PublicKey = <MOBILE_DEVICE_PUBLIC_KEY>
+AllowedIPs = 10.0.0.7/32
 ```
 
 IP address assignments:
