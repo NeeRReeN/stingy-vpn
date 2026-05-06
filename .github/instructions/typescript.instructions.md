@@ -182,25 +182,6 @@ import { join } from "node:path";
 export default class {} // Hard to track without a name
 ```
 
-### Relative Import Extensions
-
-This project uses ES Modules (`"type": "module"` in package.json) and `"moduleResolution": "NodeNext"` in tsconfig.json.
-With this configuration, **relative imports must always use the `.js` extension**, even though the source files are `.ts`.
-
-```typescript
-// Correct: use .js extension (TypeScript resolves .ts → .js at compile time)
-import { StingyVpnStack } from "../lib/stingy-vpn-stack.js";
-import type { Environment } from "../types.js";
-
-// Incorrect: omitting the extension causes a runtime resolution error in Node.js ESM
-import { StingyVpnStack } from "../lib/stingy-vpn-stack";
-import type { Environment } from "../types";
-```
-
-**Why `.js`?** Node.js ESM does not perform automatic extension resolution.
-TypeScript compiles `foo.ts` to `foo.js`, so referencing `./foo.js` at write time
-correctly resolves to `./foo.js` at runtime.
-
 ## Comments and Documentation
 
 ````typescript
