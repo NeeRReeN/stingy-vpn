@@ -56,9 +56,10 @@ src/
 
 **Environment Variables**:
 
-- `CLOUDFLARE_API_TOKEN`: Cloudflare API token (retrieved from Parameter Store)
+- `PARAMETER_STORE_PREFIX`: Parameter Store prefix (e.g., `/stingy-vpn/dev`)
 - `CLOUDFLARE_ZONE_ID`: Cloudflare Zone ID
 - `CLOUDFLARE_RECORD_ID`: DNS record ID to update
+- `LOG_LEVEL`: Log verbosity (optional, default: `info`)
 
 ## Cloudflare API
 
@@ -72,41 +73,11 @@ PATCH https://api.cloudflare.com/client/v4/zones/{zone_id}/dns_records/{record_i
 
 - Zone ID: Obtain from Cloudflare dashboard
 - Record ID: ID of existing A record
-- API Token: Token with DNS edit permissions
+- API Token: Token with DNS edit permissions; stored in Parameter Store at `${PARAMETER_STORE_PREFIX}/cloudflare-token` as a `SecureString` and fetched at runtime (not passed as an environment variable)
 
-## Testing
-
-```bash
-# Run tests for specific Lambda function
-npm test -- --testPathPattern=recovery
-npm test -- --testPathPattern=ddns-updater
-```
-
-### Testing Conventions
+## Testing Conventions
 
 - Place test files in `__tests__/` directory
 - File names should be `*.test.ts` or `*.spec.ts`
 - Properly set up environment variable mocks
 - Mock AWS SDK calls
-
-## Error Handling
-
-```typescript
-try {
-  const result = await someAsyncOperation();
-  return result;
-} catch (error) {
-  console.error("Operation failed", { error, context: "functionName" });
-  throw new Error(
-    `Failed: ${error instanceof Error ? error.message : "Unknown error"}`
-  );
-}
-```
-
-## Best Practices
-
-- Keep Lambda functions stateless
-- Set timeout values considering processing time + buffer
-- Implement retry logic (ensure idempotency)
-- Use structured logs (JSON format)
-- Optimize memory usage (cost reduction)

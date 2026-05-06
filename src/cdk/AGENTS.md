@@ -6,6 +6,22 @@ This directory contains AWS CDK stack definitions.
 
 CDK stacks that define the AWS infrastructure for stingy-vpn.
 
+## Directory Structure
+
+```
+src/cdk/
+├── bin/
+│   └── app.ts                          # CDK application entry point
+├── lib/
+│   ├── stingy-vpn-stack.ts             # Main stack
+│   └── constructs/
+│       ├── index.ts                    # Re-exports all constructs
+│       ├── vpc-construct.ts            # VPC and security groups
+│       ├── recovery-lambda-construct.ts    # Spot interruption recovery Lambda
+│       └── ddns-updater-lambda-construct.ts # Cloudflare DDNS updater Lambda
+└── types.ts                            # Shared types (Environment)
+```
+
 ## Key Resources
 
 ### Deployed Resources
@@ -19,22 +35,6 @@ CDK stacks that define the AWS infrastructure for stingy-vpn.
 | EventBridge           | Spot interruption event detection           |
 | IAM Roles             | Lambda execution permissions                |
 
-## CDK Commands
-
-```bash
-# Check CDK stack diff
-npx cdk diff
-
-# CDK deploy
-npx cdk deploy
-
-# CDK stack destroy
-npx cdk destroy
-
-# Generate CloudFormation template
-npx cdk synth
-```
-
 ## Spot Instance Recovery Flow
 
 1. EventBridge detects spot interruption event
@@ -46,14 +46,5 @@ npx cdk synth
 
 ## Coding Conventions
 
-- Design CDK Constructs to be reusable
-- Can be separated into `constructs/` directory
-- Prefix resource names with project name
-- Set appropriate tags (for cost management and resource identification)
-
-## Best Practices
-
-- Always implement spot instance interruption handling
-- Follow the principle of least privilege for IAM policies
-- Use SecureString type for sensitive values in Parameter Store
-- Enable detailed CloudWatch logging for troubleshooting
+- Design CDK Constructs to be reusable; place each Construct in the `constructs/` directory under a dedicated file
+- Props interfaces use `readonly` properties throughout
